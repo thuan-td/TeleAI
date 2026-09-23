@@ -44,6 +44,23 @@ class RetellAdapter(VoiceProvider):
         response.raise_for_status()
         return response.json()["call_id"]
 
+    def create_web_call(self, agent_id: str) -> str:
+        """Dev/test-only: start a browser-based Retell Web Call.
+
+        POST /v2/create-web-call (confirmed against docs.retellai.com 2026-09-22)
+        takes only `agent_id` and returns an `access_token` the frontend uses
+        with `retell-client-js-sdk`'s RetellWebClient to open a WebRTC session
+        directly from the browser (no phone number involved). Not part of the
+        VoiceProvider interface — this is a standalone test utility, not an
+        outbound-call operation.
+        """
+        response = self._client.post(
+            "/v2/create-web-call",
+            json={"agent_id": agent_id},
+        )
+        response.raise_for_status()
+        return response.json()["access_token"]
+
     def transfer(self, call_id: str, target: str, context: dict[str, Any]) -> None:
         raise NotImplementedError(
             "Retell has no REST API to trigger a call transfer. Configure a "

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import calls, leads, webhooks
+from app.routers import calls, leads, web_calls, webhooks
 
 app = FastAPI(title="TeleApo Clone MVP")
 
@@ -13,6 +13,7 @@ app.add_middleware(
 )
 
 app.include_router(calls.router)
+app.include_router(web_calls.router)
 app.include_router(leads.router)
 app.include_router(webhooks.router)
 

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     retell_api_key: str = ""
     retell_webhook_secret: str
     retell_from_number: str = ""
+    retell_agent_id: str = ""
+    openai_api_key: str = ""
     allowed_phone_numbers: str = ""
     intent_confidence_threshold: float = 0.7
     max_call_retries: int = 2

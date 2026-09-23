@@ -15,6 +15,30 @@ export async function fetchCalls(): Promise<CallSummary[]> {
   return response.json();
 }
 
+export async function startWebCall(): Promise<{ access_token: string }> {
+  const response = await fetch(`${API_BASE}/calls/web`, { method: "POST" });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    throw new Error(detail?.detail ?? `Failed to start web call: ${response.status}`);
+  }
+  return response.json();
+}
+
+export interface OpenAIWebCallSecret {
+  client_secret: string;
+  expires_at: number;
+  model: string;
+}
+
+export async function startOpenAIWebCall(): Promise<OpenAIWebCallSecret> {
+  const response = await fetch(`${API_BASE}/calls/web/openai`, { method: "POST" });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    throw new Error(detail?.detail ?? `Failed to start OpenAI web call: ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function dialCall(leadId: string): Promise<CallSummary> {
   const response = await fetch(`${API_BASE}/calls`, {
     method: "POST",
