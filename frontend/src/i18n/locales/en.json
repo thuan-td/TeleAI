@@ -227,6 +227,23 @@
         "female": "female · estimated",
         "unknown": "unknown"
       }
+    },
+    "knowledgeBase": {
+      "title": "Knowledge Base",
+      "enableLabel": "Enable for this agent",
+      "description": "One Knowledge Base shared across every agent (Retell + OpenAI) — AI looks it up when enabled, instead of relying only on the prompt.",
+      "empty": "No documents yet.",
+      "deleteTitle": "Delete",
+      "namePlaceholder": "Document title",
+      "textPlaceholder": "Content (FAQ, product info...)",
+      "createButton": "Add document",
+      "creating": "Adding...",
+      "uploadLabel": "Or upload files",
+      "uploadNote": "Supports PDF, DOCX, JPG, PNG (Vietnamese OCR) — select multiple files at once.",
+      "uploading": "Processing files..."
+    },
+    "modelPicker": {
+      "label": "AI Model"
     }
   }
 }

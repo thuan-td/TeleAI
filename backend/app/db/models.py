@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Computed, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.core.clock import utcnow
@@ -60,6 +60,34 @@ class AppSetting(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow
     )
+
+
+class KnowledgeBaseDocument(Base):
+    """App-owned Knowledge Base, shared across every voice provider (Retell
+    custom function + OpenAI Realtime tool call both query this same table
+    via POST /kb/query) — replaces Retell's per-provider managed KB so
+    content isn't duplicated/out-of-sync between providers.
+
+    Uses Postgres full-text search (tsvector), not pgvector/embeddings:
+    lower query latency (no embedding API round-trip) matters more than
+    semantic recall for short FAQ-style lookups during a live voice call."""
+
+    __tablename__ = "kb_documents"
+    __table_args__ = (Index("ix_kb_documents_tokens", "tokens", postgresql_using="gin"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    tokens: Mapped[str] = mapped_column(
+        TSVECTOR,
+        Computed(
+            "setweight(to_tsvector('simple', title), 'A') || "
+            "setweight(to_tsvector('simple', content), 'B')",
+            persisted=True,
+        ),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow)
 
 
 class WebhookEvent(Base):

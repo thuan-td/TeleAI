@@ -16,6 +16,18 @@ class Settings(BaseSettings):
     retell_from_number: str = ""
     retell_agent_id: str = ""
     openai_api_key: str = ""
+    # Public URL Retell's custom-function webhook calls back into (Retell
+    # rejects `localhost` — confirmed via docs research 2026-09-24). Needs a
+    # tunnel (ngrok/cloudflared) in dev, a real domain in production.
+    app_public_url: str = ""
+    # Shared secret sent by Retell as a custom header on the KB custom-function
+    # call (configured in _knowledge_base_tool()'s `headers`) and checked in
+    # POST /kb/retell-function-call — without this the webhook is a public,
+    # unauthenticated read of the entire knowledge base (code review finding,
+    # 2026-09-24). Same pattern as retell_webhook_secret, different endpoint
+    # (that one guards the Retell *event* webhook, this guards the *custom
+    # function* webhook — separate Retell features, separate secrets).
+    kb_webhook_secret: str = ""
     allowed_phone_numbers: str = ""
     intent_confidence_threshold: float = 0.7
     max_call_retries: int = 2

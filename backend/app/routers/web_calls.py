@@ -12,6 +12,7 @@ from app.dependencies import get_voice_provider
 from app.services.app_settings import (
     OPENAI_LANGUAGE_NAMES,
     get_openai_language,
+    get_openai_model,
     get_openai_prompt,
     get_openai_voice,
 )
@@ -19,7 +20,6 @@ from app.services.app_settings import (
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/calls", tags=["calls"])
 
-OPENAI_REALTIME_MODEL = "gpt-realtime"
 OPENAI_CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets"
 OPENAI_TRANSLATE_MODEL = "gpt-4o-mini"
 OPENAI_CHAT_COMPLETIONS_URL = "https://api.openai.com/v1/chat/completions"
@@ -143,6 +143,7 @@ def start_openai_web_call(
     language = get_openai_language(db)
     prompt = get_openai_prompt(db)
     voice = get_openai_voice(db)
+    model = get_openai_model(db)
 
     try:
         response = _openai_client.post(
@@ -154,7 +155,7 @@ def start_openai_web_call(
             json={
                 "session": {
                     "type": "realtime",
-                    "model": OPENAI_REALTIME_MODEL,
+                    "model": model,
                     "instructions": _build_instructions(settings.openai_api_key, prompt, language),
                     # Confirmed live against api.openai.com 2026-09-24: `voice`
                     # is NOT a top-level session field (that 400s with
@@ -176,5 +177,5 @@ def start_openai_web_call(
     return OpenAIWebCallResponse(
         client_secret=payload["value"],
         expires_at=payload["expires_at"],
-        model=OPENAI_REALTIME_MODEL,
+        model=model,
     )

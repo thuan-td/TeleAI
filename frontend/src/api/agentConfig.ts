@@ -10,12 +10,15 @@ export interface AgentConfigResponse {
   begin_message: string | null;
   voice_id: string;
   language: string;
+  model: string | null;
   responsiveness: number | null;
   interruption_sensitivity: number | null;
   intent_confidence_threshold: number;
   openai_realtime_language: string;
   openai_realtime_prompt: string;
   openai_realtime_voice: string;
+  openai_realtime_model: string;
+  knowledge_base_enabled: boolean;
 }
 
 export interface AgentConfigUpdate {
@@ -23,12 +26,15 @@ export interface AgentConfigUpdate {
   begin_message?: string;
   voice_id?: string;
   language?: string;
+  model?: string;
   responsiveness?: number;
   interruption_sensitivity?: number;
   intent_confidence_threshold?: number;
   openai_realtime_language?: string;
   openai_realtime_prompt?: string;
   openai_realtime_voice?: string;
+  openai_realtime_model?: string;
+  knowledge_base_enabled?: boolean;
   publish: boolean;
 }
 
@@ -93,3 +99,4 @@ export async function fetchVoices(): Promise<VoiceOption[]> {
   }
   return response.json();
 }
+

@@ -1,4 +1,6 @@
 import { useTranslation } from "react-i18next";
+import { Textarea } from "../ui/Textarea";
+import { TextInput } from "../ui/TextInput";
 
 interface PromptEditorProps {
   generalPrompt: string;
@@ -29,13 +31,11 @@ export function PromptEditor({
             {t("agentConfig.promptEditor.charCount", { count: beginMessage.length })}
           </span>
         </div>
-        <input
+        <TextInput
           id="begin-message"
-          type="text"
           value={beginMessage}
           disabled={disabled}
           onChange={(e) => onBeginMessageChange(e.target.value)}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 disabled:cursor-not-allowed disabled:bg-slate-100"
           placeholder={t("agentConfig.promptEditor.beginMessagePlaceholder")}
         />
       </div>
@@ -49,13 +49,13 @@ export function PromptEditor({
             {t("agentConfig.promptEditor.charCount", { count: generalPrompt.length })}
           </span>
         </div>
-        <textarea
+        <Textarea
           id="general-prompt"
           rows={16}
           value={generalPrompt}
           disabled={disabled}
           onChange={(e) => onGeneralPromptChange(e.target.value)}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900 disabled:cursor-not-allowed disabled:bg-slate-100"
+          className="w-full font-mono"
           placeholder={t("agentConfig.promptEditor.generalPromptPlaceholder")}
         />
       </div>

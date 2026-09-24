@@ -1,6 +1,19 @@
 import { useTranslation } from "react-i18next";
+import { Textarea } from "../ui/Textarea";
+import { ModelPicker } from "./ModelPicker";
 
 const OPENAI_LANGUAGE_OPTIONS = ["vi", "ja", "en"] as const;
+
+// Verified live (2026-09-24) against GET https://api.openai.com/v1/models —
+// see backend/app/services/app_settings.py OPENAI_REALTIME_MODELS.
+const OPENAI_REALTIME_MODELS = [
+  "gpt-realtime",
+  "gpt-realtime-1.5",
+  "gpt-realtime-2",
+  "gpt-realtime-2.1",
+  "gpt-realtime-2.1-mini",
+  "gpt-realtime-mini",
+];
 
 // Gender hints are NOT official OpenAI metadata — OpenAI documents no
 // gender/accent info for these voices. Based only on scattered community
@@ -26,6 +39,8 @@ interface OpenAIRealtimeConfigProps {
   onPromptChange: (value: string) => void;
   voice: string;
   onVoiceChange: (value: string) => void;
+  model: string;
+  onModelChange: (value: string) => void;
 }
 
 export function OpenAIRealtimeConfig({
@@ -35,6 +50,8 @@ export function OpenAIRealtimeConfig({
   onPromptChange,
   voice,
   onVoiceChange,
+  model,
+  onModelChange,
 }: OpenAIRealtimeConfigProps) {
   const { t } = useTranslation();
   return (
@@ -46,13 +63,13 @@ export function OpenAIRealtimeConfig({
           {t("agentConfig.openaiRealtimePrompt.label")}
         </label>
         <p className="text-xs text-purple-700">{t("agentConfig.openaiRealtimePrompt.note")}</p>
-        <textarea
+        <Textarea
           id="openai-prompt"
+          variant="purple"
           value={prompt}
           onChange={(e) => onPromptChange(e.target.value)}
           placeholder={t("agentConfig.openaiRealtimePrompt.placeholder")}
           rows={5}
-          className="rounded-md border border-purple-300 bg-white px-3 py-2 text-sm text-purple-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
         />
       </div>
 
@@ -93,6 +110,8 @@ export function OpenAIRealtimeConfig({
           ))}
         </select>
       </div>
+
+      <ModelPicker models={OPENAI_REALTIME_MODELS} selectedModel={model} variant="purple" onSelect={onModelChange} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { TextInput } from "../ui/TextInput";
 
 export interface LeadFiltersValue {
   q: string;
@@ -31,11 +32,10 @@ export function LeadFilters({ value, onChange }: LeadFiltersProps) {
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-slate-700">
         {t("leads.filters.searchLabel")}
-        <input
+        <TextInput
           value={value.q}
           onChange={(e) => onChange({ ...value, q: e.target.value })}
           placeholder={t("leads.filters.searchPlaceholder")}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-slate-700">

@@ -227,6 +227,23 @@
         "female": "nữ · ước lượng",
         "unknown": "chưa rõ"
       }
+    },
+    "knowledgeBase": {
+      "title": "Knowledge Base",
+      "enableLabel": "Bật cho agent này",
+      "description": "1 Knowledge Base dùng chung cho mọi agent (Retell + OpenAI) — AI sẽ tra cứu khi bật, thay vì chỉ dựa vào prompt.",
+      "empty": "Chưa có tài liệu nào.",
+      "deleteTitle": "Xoá",
+      "namePlaceholder": "Tiêu đề tài liệu",
+      "textPlaceholder": "Nội dung (FAQ, thông tin sản phẩm...)",
+      "createButton": "Thêm tài liệu",
+      "creating": "Đang thêm...",
+      "uploadLabel": "Hoặc upload file",
+      "uploadNote": "Hỗ trợ PDF, DOCX, JPG, PNG (OCR tiếng Việt) — có thể chọn nhiều file cùng lúc.",
+      "uploading": "Đang xử lý file..."
+    },
+    "modelPicker": {
+      "label": "Model AI"
     }
   }
 }

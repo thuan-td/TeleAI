@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createLead, updateLead, type Lead } from "../../api/leads";
+import { TextInput } from "../ui/TextInput";
 
 interface LeadFormModalProps {
   lead: Lead | null;
@@ -48,20 +49,18 @@ export function LeadFormModal({ lead, onClose, onSaved }: LeadFormModalProps) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm text-slate-700">
             {t("leads.form.phoneLabel")}
-            <input
+            <TextInput
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={t("leads.form.phonePlaceholder")}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-slate-700">
             {t("leads.form.nameLabel")}
-            <input
+            <TextInput
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("leads.form.namePlaceholder")}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm text-slate-700">

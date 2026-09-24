@@ -393,6 +393,276 @@ def test_webhook_uses_db_intent_threshold_over_env_default(client, sample_lead, 
     assert record.transfer_result is None  # NOT flagged — DB threshold (0.2) beats env (0.7)
 
 
+def test_get_agent_config_includes_model_from_llm(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {"general_prompt": "Prompt", "model": "gpt-5.6-terra"}
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.get("/agent/config")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["model"] == "gpt-5.6-terra"
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_model_calls_update_retell_llm(client, test_settings):
+    # Arrange — LLM still draft, PATCH in place
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {"llm_id": LLM_ID, "is_published": False}
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"model": "claude-4.5-sonnet", "publish": False})
+
+    # Assert
+    assert response.status_code == 200
+    admin.update_llm.assert_called_once_with(LLM_ID, {"model": "claude-4.5-sonnet"})
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_rejects_unsupported_model(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+
+    # Act
+    response = client.patch("/agent/config", json={"model": "not-a-real-model", "publish": False})
+
+    # Assert
+    assert response.status_code == 422
+
+
+def test_get_agent_config_includes_openai_realtime_model(client, test_settings, db_session):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {"general_prompt": "Prompt"}
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+    db_session.add(AppSetting(key="openai_realtime_model", value="gpt-realtime-2.1"))
+    db_session.commit()
+
+    # Act
+    response = client.get("/agent/config")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["openai_realtime_model"] == "gpt-realtime-2.1"
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_saves_openai_realtime_model(client, test_settings, db_session):
+    # Arrange — app-local only, no Retell call needed
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"openai_realtime_model": "gpt-realtime-mini", "publish": False})
+
+    # Assert
+    assert response.status_code == 200
+    admin.update_agent.assert_not_called()
+    admin.update_llm.assert_not_called()
+    data = response.json()
+    assert data["updated_local"] is True
+    assert db_session.get(AppSetting, "openai_realtime_model").value == "gpt-realtime-mini"
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_rejects_unsupported_openai_realtime_model(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+
+    # Act
+    response = client.patch(
+        "/agent/config", json={"openai_realtime_model": "not-a-real-model", "publish": False}
+    )
+
+    # Assert
+    assert response.status_code == 422
+
+
+def test_get_agent_config_knowledge_base_enabled_true_when_tool_present(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+        "voice_id": "voice-1",
+        "language": "ja-JP",
+    }
+    admin.get_llm.return_value = {
+        "general_prompt": "Prompt",
+        "general_tools": [{"type": "custom", "name": "query_knowledge_base", "url": "https://x/kb"}],
+    }
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.get("/agent/config")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["knowledge_base_enabled"] is True
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_get_agent_config_knowledge_base_enabled_false_when_tool_absent(client, test_settings):
+    # Arrange — LLM has other tools but not query_knowledge_base
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {
+        "general_prompt": "Prompt",
+        "general_tools": [{"type": "custom", "name": "some_other_tool", "url": "https://x/y"}],
+    }
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.get("/agent/config")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["knowledge_base_enabled"] is False
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_knowledge_base_enabled_true_adds_custom_tool(client, test_settings):
+    # Arrange — LLM still draft, PATCH in place; other_tool must survive untouched
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    test_settings.app_public_url = "https://app.example.com"
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {
+        "llm_id": LLM_ID,
+        "is_published": False,
+        "general_tools": [{"type": "custom", "name": "other_tool", "url": "https://x/y"}],
+    }
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"knowledge_base_enabled": True, "publish": False})
+
+    # Assert
+    assert response.status_code == 200
+    admin.update_llm.assert_called_once()
+    called_fields = admin.update_llm.call_args.args[1]
+    tool_names = {tool["name"] for tool in called_fields["general_tools"]}
+    assert tool_names == {"other_tool", "query_knowledge_base"}
+    kb_tool = next(t for t in called_fields["general_tools"] if t["name"] == "query_knowledge_base")
+    assert kb_tool["url"] == "https://app.example.com/kb/retell-function-call"
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_knowledge_base_enabled_false_removes_custom_tool(client, test_settings):
+    # Arrange — regression: disabling must send [] (not omitted) to actually detach
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    test_settings.app_public_url = "https://app.example.com"
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {
+        "llm_id": LLM_ID,
+        "is_published": False,
+        "general_tools": [{"type": "custom", "name": "query_knowledge_base", "url": "https://x/kb"}],
+    }
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"knowledge_base_enabled": False, "publish": False})
+
+    # Assert
+    assert response.status_code == 200
+    admin.update_llm.assert_called_once_with(LLM_ID, {"general_tools": []})
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_knowledge_base_enabled_without_app_public_url_returns_422(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    test_settings.app_public_url = ""
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {"llm_id": LLM_ID, "is_published": False}
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"knowledge_base_enabled": True, "publish": False})
+
+    # Assert
+    assert response.status_code == 422
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_knowledge_base_enabled_without_kb_webhook_secret_returns_422(client, test_settings):
+    # Arrange — regression: both APP_PUBLIC_URL and KB_WEBHOOK_SECRET are required
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    test_settings.app_public_url = "https://app.example.com"
+    test_settings.kb_webhook_secret = ""
+    admin = _fake_admin()
+    admin.get_agent.return_value = {
+        "agent_id": AGENT_ID,
+        "version": 1,
+        "response_engine": {"type": "retell-llm", "llm_id": LLM_ID},
+    }
+    admin.get_llm.return_value = {"llm_id": LLM_ID, "is_published": False}
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch("/agent/config", json={"knowledge_base_enabled": True, "publish": False})
+
+    # Assert
+    assert response.status_code == 422
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
 def test_get_agent_config_custom_llm_engine_returns_null_prompt(client, test_settings):
     # Arrange
     test_settings.retell_api_key = "sk-test"

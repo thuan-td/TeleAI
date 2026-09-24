@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchLeads, type Lead } from "../../api/leads";
+import { TextInput } from "../ui/TextInput";
 
 export interface CallFiltersValue {
   status: string;
@@ -36,11 +37,10 @@ export function CallFilters({ value, onChange }: CallFiltersProps) {
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
       <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-slate-700">
         {t("calls.filters.searchLabel")}
-        <input
+        <TextInput
           value={value.q}
           onChange={(e) => onChange({ ...value, q: e.target.value })}
           placeholder={t("calls.filters.searchPlaceholder")}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-slate-700">
@@ -74,20 +74,18 @@ export function CallFilters({ value, onChange }: CallFiltersProps) {
       </label>
       <label className="flex flex-col gap-1 text-sm text-slate-700">
         {t("calls.filters.dateFromLabel")}
-        <input
+        <TextInput
           type="date"
           value={value.dateFrom}
           onChange={(e) => onChange({ ...value, dateFrom: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm text-slate-700">
         {t("calls.filters.dateToLabel")}
-        <input
+        <TextInput
           type="date"
           value={value.dateTo}
           onChange={(e) => onChange({ ...value, dateTo: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
         />
       </label>
     </div>

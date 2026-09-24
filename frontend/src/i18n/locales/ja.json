@@ -227,6 +227,23 @@
         "female": "女性・推定",
         "unknown": "不明"
       }
+    },
+    "knowledgeBase": {
+      "title": "ナレッジベース",
+      "enableLabel": "このエージェントで有効化",
+      "description": "全エージェント（Retell + OpenAI）共通の1つのナレッジベース — 有効化するとプロンプトだけに頼らずAIが参照します。",
+      "empty": "ドキュメントがまだありません。",
+      "deleteTitle": "削除",
+      "namePlaceholder": "ドキュメントのタイトル",
+      "textPlaceholder": "内容（FAQ、商品情報など）",
+      "createButton": "ドキュメントを追加",
+      "creating": "追加中...",
+      "uploadLabel": "またはファイルをアップロード",
+      "uploadNote": "PDF、DOCX、JPG、PNG対応（ベトナム語OCR）— 複数ファイルを同時に選択できます。",
+      "uploading": "ファイルを処理中..."
+    },
+    "modelPicker": {
+      "label": "AIモデル"
     }
   }
 }

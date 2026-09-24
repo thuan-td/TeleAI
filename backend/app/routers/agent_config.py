@@ -12,18 +12,76 @@ from app.db.session import get_db
 from app.dependencies import get_retell_admin_client
 from app.services.app_settings import (
     OPENAI_LANGUAGE_NAMES,
+    OPENAI_REALTIME_MODELS,
     OPENAI_VOICES,
     get_intent_threshold,
     get_openai_language,
+    get_openai_model,
     get_openai_prompt,
     get_openai_voice,
     set_intent_threshold,
     set_openai_language,
+    set_openai_model,
     set_openai_prompt,
     set_openai_voice,
 )
 
 router = APIRouter(prefix="/agent", tags=["agent-config"])
+
+# Retell LLM `model` field's allowed values — verified live (2026-09-24) via
+# the 400 validation error PATCH /update-retell-llm returns for an invalid
+# model ("request/body/model must be equal to one of the allowed values:
+# ..."), NOT from docs alone (docs/research can drift from the live enum).
+# Excludes `s2s_model` (speech-to-speech, mutually exclusive with `model` —
+# out of scope here, would need a separate UI concept, not just a dropdown).
+RETELL_MODELS = {
+    "gpt-4o", "gpt-4o-mini",
+    "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano",
+    "gpt-5", "gpt-5-mini", "gpt-5-nano",
+    "gpt-5.1", "gpt-5.2", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.5",
+    "gpt-5.6-terra", "gpt-5.6-luna",
+    "gpt-6-astra", "gpt-6-sol", "gpt-6-luna",
+    "claude-4.0-sonnet", "claude-4.5-sonnet", "claude-4.6-sonnet", "claude-5-sonnet",
+    "claude-4.5-haiku",
+    "gemini-2.0-flash", "gemini-2.0-flash-lite",
+    "gemini-2.5-flash", "gemini-2.5-flash-lite",
+    "gemini-3.0-flash", "gemini-3.1-flash-lite",
+    "gemini-3.5-flash", "gemini-3.5-flash-lite",
+    "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash",
+}
+
+# Name Retell's custom-function tool must use — matches the frontend
+# OpenAI-tool declaration (same name, same shared /kb/query semantics) so both
+# providers' function-call events read the same way in logs/transcripts.
+KNOWLEDGE_BASE_TOOL_NAME = "query_knowledge_base"
+
+
+def _knowledge_base_tool(app_public_url: str, kb_webhook_secret: str) -> dict[str, Any]:
+    """Retell custom-function tool definition (general_tools entry) pointing
+    back at this app's shared KB webhook. Verified shape against
+    docs.retellai.com/integrate-llm/integrate-function-calling (2026-09-24):
+    {"type": "custom", "name", "url", "description", "parameters", "headers", ...}.
+    `headers` carries a shared secret Retell sends back on every call so
+    /kb/retell-function-call isn't a public, unauthenticated KB read (code
+    review finding, 2026-09-24)."""
+    return {
+        "type": "custom",
+        "name": KNOWLEDGE_BASE_TOOL_NAME,
+        "url": f"{app_public_url.rstrip('/')}/kb/retell-function-call",
+        "description": (
+            "Search the company knowledge base for information needed to answer "
+            "the caller's question accurately. Call this whenever the caller asks "
+            "something that isn't already covered by your instructions."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "What to search for"}},
+            "required": ["query"],
+        },
+        "headers": {"X-KB-Webhook-Secret": kb_webhook_secret},
+        "timeout_ms": 5000,
+        "speak_during_execution": True,
+    }
 
 # In-process cache for /agent/voices — voice list is near-static, avoid
 # hitting Retell on every page load (plan step 9). Not thread-safe by design
@@ -42,12 +100,15 @@ class AgentConfigResponse(BaseModel):
     begin_message: str | None
     voice_id: str
     language: str | list[str]
+    model: str | None
     responsiveness: float | None
     interruption_sensitivity: float | None
     intent_confidence_threshold: float
     openai_realtime_language: str
     openai_realtime_prompt: str
     openai_realtime_voice: str
+    openai_realtime_model: str
+    knowledge_base_enabled: bool
 
 
 class AgentConfigUpdate(BaseModel):
@@ -55,12 +116,15 @@ class AgentConfigUpdate(BaseModel):
     begin_message: str | None = None
     voice_id: str | None = None
     language: str | None = None
+    model: str | None = None
     responsiveness: float | None = Field(None, ge=0, le=1)
     interruption_sensitivity: float | None = Field(None, ge=0, le=1)
     intent_confidence_threshold: float | None = Field(None, ge=0, le=1)
     openai_realtime_language: str | None = None
     openai_realtime_prompt: str | None = None
     openai_realtime_voice: str | None = None
+    openai_realtime_model: str | None = None
+    knowledge_base_enabled: bool | None = None
     publish: bool = True
 
 
@@ -112,6 +176,8 @@ def get_agent_config(
     llm_id: str | None = None
     general_prompt: str | None = None
     begin_message: str | None = None
+    model: str | None = None
+    knowledge_base_enabled = False
 
     if response_engine.get("type") == "retell-llm":
         llm_id = response_engine.get("llm_id")
@@ -124,6 +190,11 @@ def get_agent_config(
                 raise HTTPException(status_code=502, detail=f"Không gọi được Retell API: {exc}") from exc
             general_prompt = llm.get("general_prompt")
             begin_message = llm.get("begin_message")
+            model = llm.get("model")
+            general_tools = llm.get("general_tools") or []
+            knowledge_base_enabled = any(
+                tool.get("name") == KNOWLEDGE_BASE_TOOL_NAME for tool in general_tools
+            )
 
     return AgentConfigResponse(
         agent_id=agent["agent_id"],
@@ -135,12 +206,15 @@ def get_agent_config(
         begin_message=begin_message,
         voice_id=agent.get("voice_id", ""),
         language=agent.get("language", "ja"),
+        model=model,
         responsiveness=agent.get("responsiveness"),
         interruption_sensitivity=agent.get("interruption_sensitivity"),
         intent_confidence_threshold=get_intent_threshold(db, settings),
         openai_realtime_language=get_openai_language(db),
         openai_realtime_prompt=get_openai_prompt(db),
         openai_realtime_voice=get_openai_voice(db),
+        openai_realtime_model=get_openai_model(db),
+        knowledge_base_enabled=knowledge_base_enabled,
     )
 
 
@@ -159,10 +233,15 @@ def patch_agent_config(
             "interruption_sensitivity": body.interruption_sensitivity,
         }
     )
+    if body.model is not None and body.model not in RETELL_MODELS:
+        raise HTTPException(
+            status_code=422, detail=f"model phải là một trong {sorted(RETELL_MODELS)}"
+        )
     llm_fields = _omit_none(
         {
             "general_prompt": body.general_prompt,
             "begin_message": body.begin_message,
+            "model": body.model,
         }
     )
 
@@ -198,9 +277,18 @@ def patch_agent_config(
         set_openai_voice(db, body.openai_realtime_voice)
         updated_local = True
 
+    if body.openai_realtime_model is not None:
+        if body.openai_realtime_model not in OPENAI_REALTIME_MODELS:
+            raise HTTPException(
+                status_code=422,
+                detail=f"openai_realtime_model phải là một trong {sorted(OPENAI_REALTIME_MODELS)}",
+            )
+        set_openai_model(db, body.openai_realtime_model)
+        updated_local = True
+
     llm_id: str | None = None
     target_version: int | None = None
-    if agent_fields or llm_fields:
+    if agent_fields or llm_fields or body.knowledge_base_enabled is not None:
         try:
             agent = admin.get_agent(settings.retell_agent_id)
         except httpx.HTTPStatusError as exc:
@@ -225,7 +313,7 @@ def patch_agent_config(
                 raise HTTPException(status_code=502, detail=f"Không gọi được Retell API: {exc}") from exc
             target_version = draft["version"]
 
-    if llm_fields:
+    if llm_fields or body.knowledge_base_enabled is not None:
         if not llm_id:
             raise HTTPException(
                 status_code=422,
@@ -237,6 +325,24 @@ def patch_agent_config(
             raise _map_upstream_error(exc) from exc
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"Không gọi được Retell API: {exc}") from exc
+
+        if body.knowledge_base_enabled is not None:
+            if not settings.app_public_url or not settings.kb_webhook_secret:
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        "Thiếu APP_PUBLIC_URL/KB_WEBHOOK_SECRET trong cấu hình — cần URL public "
+                        "và secret để Retell gọi webhook KB an toàn"
+                    ),
+                )
+            other_tools = [
+                tool
+                for tool in (current_llm.get("general_tools") or [])
+                if tool.get("name") != KNOWLEDGE_BASE_TOOL_NAME
+            ]
+            if body.knowledge_base_enabled:
+                other_tools.append(_knowledge_base_tool(settings.app_public_url, settings.kb_webhook_secret))
+            llm_fields["general_tools"] = other_tools
 
         try:
             if current_llm.get("is_published"):

@@ -12,13 +12,28 @@ INTENT_THRESHOLD_KEY = "intent_confidence_threshold"
 OPENAI_LANGUAGE_KEY = "openai_realtime_language"
 OPENAI_PROMPT_KEY = "openai_realtime_prompt"
 OPENAI_VOICE_KEY = "openai_realtime_voice"
+OPENAI_MODEL_KEY = "openai_realtime_model"
 
 DEFAULT_OPENAI_LANGUAGE = "ja"
 DEFAULT_OPENAI_PROMPT = ""
 DEFAULT_OPENAI_VOICE = "marin"
+DEFAULT_OPENAI_MODEL = "gpt-realtime"
 
 OPENAI_LANGUAGE_NAMES = {"vi": "Vietnamese", "ja": "Japanese", "en": "English"}
 OPENAI_VOICES = {"alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse", "marin", "cedar"}
+# Verified live against GET https://api.openai.com/v1/models (2026-09-24) —
+# every model whose id contains "realtime" and is usable as the Realtime
+# session's top-level `model` (excludes gpt-audio-* which aren't Realtime
+# session models, and gpt-realtime-translate/whisper which are single-purpose,
+# not general-purpose voice-agent models).
+OPENAI_REALTIME_MODELS = {
+    "gpt-realtime",
+    "gpt-realtime-1.5",
+    "gpt-realtime-2",
+    "gpt-realtime-2.1",
+    "gpt-realtime-2.1-mini",
+    "gpt-realtime-mini",
+}
 
 
 def _get_setting(db: Session, key: str, default: str) -> str:
@@ -93,3 +108,15 @@ def get_openai_voice(db: Session) -> str:
 
 def set_openai_voice(db: Session, value: str) -> None:
     _set_setting(db, OPENAI_VOICE_KEY, value)
+
+
+def get_openai_model(db: Session) -> str:
+    """OpenAI Realtime model (one of OPENAI_REALTIME_MODELS). Falls back to
+    the default if the stored value is no longer valid (e.g. OpenAI
+    deprecates one)."""
+    value = _get_setting(db, OPENAI_MODEL_KEY, DEFAULT_OPENAI_MODEL)
+    return value if value in OPENAI_REALTIME_MODELS else DEFAULT_OPENAI_MODEL
+
+
+def set_openai_model(db: Session, value: str) -> None:
+    _set_setting(db, OPENAI_MODEL_KEY, value)

@@ -10,7 +10,10 @@ import {
   type VoiceOption,
 } from "../api/agentConfig";
 import { BehaviorSliders } from "../components/agent/BehaviorSliders";
+import { KnowledgeBaseDocuments } from "../components/agent/KnowledgeBaseDocuments";
+import { KnowledgeBaseToggle } from "../components/agent/KnowledgeBaseToggle";
 import { LanguagePicker } from "../components/agent/LanguagePicker";
+import { ModelPicker } from "../components/agent/ModelPicker";
 import { OpenAIRealtimeConfig } from "../components/agent/OpenAIRealtimeConfig";
 import { PromptEditor } from "../components/agent/PromptEditor";
 import { SaveResultBanner } from "../components/agent/SaveResultBanner";
@@ -19,17 +22,39 @@ import { VoicePicker } from "../components/agent/VoicePicker";
 
 type ProviderTab = "retell" | "openai";
 
+// Verified live (2026-09-24) against PATCH /update-retell-llm's validation
+// error, NOT from docs alone — see backend/app/routers/agent_config.py
+// RETELL_MODELS for the source-of-truth comment.
+const RETELL_MODELS = [
+  "gpt-4o", "gpt-4o-mini",
+  "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano",
+  "gpt-5", "gpt-5-mini", "gpt-5-nano",
+  "gpt-5.1", "gpt-5.2", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.5",
+  "gpt-5.6-terra", "gpt-5.6-luna",
+  "gpt-6-astra", "gpt-6-sol", "gpt-6-luna",
+  "claude-4.0-sonnet", "claude-4.5-sonnet", "claude-4.6-sonnet", "claude-5-sonnet",
+  "claude-4.5-haiku",
+  "gemini-2.0-flash", "gemini-2.0-flash-lite",
+  "gemini-2.5-flash", "gemini-2.5-flash-lite",
+  "gemini-3.0-flash", "gemini-3.1-flash-lite",
+  "gemini-3.5-flash", "gemini-3.5-flash-lite",
+  "gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.8-flash",
+];
+
 interface FormState {
   general_prompt: string;
   begin_message: string;
   voice_id: string;
   language: string;
+  model: string;
   responsiveness: number;
   interruption_sensitivity: number;
   intent_confidence_threshold: number;
   openai_realtime_language: string;
   openai_realtime_prompt: string;
   openai_realtime_voice: string;
+  openai_realtime_model: string;
+  knowledge_base_enabled: boolean;
 }
 
 function toFormState(config: AgentConfigResponse): FormState {
@@ -38,12 +63,15 @@ function toFormState(config: AgentConfigResponse): FormState {
     begin_message: config.begin_message ?? "",
     voice_id: config.voice_id,
     language: Array.isArray(config.language) ? (config.language[0] ?? "en-US") : config.language,
+    model: config.model ?? RETELL_MODELS[0],
     responsiveness: config.responsiveness ?? 1,
     interruption_sensitivity: config.interruption_sensitivity ?? 1,
     intent_confidence_threshold: config.intent_confidence_threshold,
     openai_realtime_language: config.openai_realtime_language,
     openai_realtime_prompt: config.openai_realtime_prompt,
     openai_realtime_voice: config.openai_realtime_voice,
+    openai_realtime_model: config.openai_realtime_model,
+    knowledge_base_enabled: config.knowledge_base_enabled,
   };
 }
 
@@ -105,12 +133,15 @@ export function AgentConfigPage() {
         begin_message: form.begin_message,
         voice_id: form.voice_id,
         language: form.language,
+        model: form.model,
         responsiveness: form.responsiveness,
         interruption_sensitivity: form.interruption_sensitivity,
         intent_confidence_threshold: form.intent_confidence_threshold,
         openai_realtime_language: form.openai_realtime_language,
         openai_realtime_prompt: form.openai_realtime_prompt,
         openai_realtime_voice: form.openai_realtime_voice,
+        openai_realtime_model: form.openai_realtime_model,
+        knowledge_base_enabled: form.knowledge_base_enabled,
         publish: true,
       });
       setSaveResult(result);
@@ -216,6 +247,12 @@ export function AgentConfigPage() {
 
           <LanguagePicker language={form.language} onLanguageChange={(v) => updateField("language", v)} />
 
+          <ModelPicker
+            models={RETELL_MODELS}
+            selectedModel={form.model}
+            onSelect={(v) => updateField("model", v)}
+          />
+
           <BehaviorSliders
             responsiveness={form.responsiveness}
             interruptionSensitivity={form.interruption_sensitivity}
@@ -228,18 +265,29 @@ export function AgentConfigPage() {
             value={form.intent_confidence_threshold}
             onChange={(v) => updateField("intent_confidence_threshold", v)}
           />
+
+          <KnowledgeBaseToggle
+            enabled={form.knowledge_base_enabled}
+            disabled={config.llm_id === null}
+            onEnabledChange={(v) => updateField("knowledge_base_enabled", v)}
+          />
         </>
       )}
 
       {activeTab === "openai" && (
-        <OpenAIRealtimeConfig
-          language={form.openai_realtime_language}
-          onLanguageChange={(v) => updateField("openai_realtime_language", v)}
-          prompt={form.openai_realtime_prompt}
-          onPromptChange={(v) => updateField("openai_realtime_prompt", v)}
-          voice={form.openai_realtime_voice}
-          onVoiceChange={(v) => updateField("openai_realtime_voice", v)}
-        />
+        <>
+          <OpenAIRealtimeConfig
+            language={form.openai_realtime_language}
+            onLanguageChange={(v) => updateField("openai_realtime_language", v)}
+            prompt={form.openai_realtime_prompt}
+            onPromptChange={(v) => updateField("openai_realtime_prompt", v)}
+            voice={form.openai_realtime_voice}
+            onVoiceChange={(v) => updateField("openai_realtime_voice", v)}
+            model={form.openai_realtime_model}
+            onModelChange={(v) => updateField("openai_realtime_model", v)}
+          />
+          <KnowledgeBaseDocuments />
+        </>
       )}
     </div>
   );
