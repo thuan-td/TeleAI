@@ -11,6 +11,7 @@ from app.core.config import Settings, get_settings
 from app.db.models import CallRecord, WebhookEvent
 from app.db.session import get_db
 from app.dependencies import get_voice_provider
+from app.services.app_settings import get_intent_threshold
 from app.services.telephony_controller import (
     INVALID_NUMBER_STATUS,
     NO_ANSWER_STATUS,
@@ -77,7 +78,7 @@ def _apply_event(db: Session, record: CallRecord, event: Any, settings: Settings
     elif event.event_type == "call_analyzed":
         if event.intent_confidence is not None:
             record.intent_confidence = event.intent_confidence
-            flag_low_confidence_for_review(db, record, settings.intent_confidence_threshold)
+            flag_low_confidence_for_review(db, record, get_intent_threshold(db, settings))
         if event.transcript_status:
             record.transcript_status = event.transcript_status
         if event.recording_url:

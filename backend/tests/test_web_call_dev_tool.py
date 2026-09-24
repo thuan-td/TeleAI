@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 
 from app.adapters.retell_adapter import RetellAdapter
+from app.db.models import AppSetting
 from app.dependencies import get_voice_provider
 from app.main import app
 
@@ -50,6 +51,25 @@ def test_web_call_start_rejects_when_agent_id_missing(client, test_settings):
     fake_retell.create_web_call.assert_not_called()
 
 
+def test_web_call_start_returns_502_when_retell_errors(client, test_settings):
+    # Arrange
+    test_settings.retell_agent_id = "agent-123"
+    fake_retell = MagicMock(spec=RetellAdapter)
+    fake_request = httpx.Request("POST", "https://api.retellai.com/v2/create-web-call")
+    fake_response = httpx.Response(status_code=401, request=fake_request)
+    fake_retell.create_web_call.side_effect = httpx.HTTPStatusError(
+        "unauthorized", request=fake_request, response=fake_response
+    )
+    app.dependency_overrides[get_voice_provider] = lambda: fake_retell
+
+    # Act
+    response = client.post("/calls/web")
+
+    # Assert
+    assert response.status_code == 502
+    assert "401" in response.json()["detail"]
+
+
 def test_retell_adapter_create_web_call_posts_agent_id_and_returns_token():
     # Arrange
     fake_http_client = MagicMock()
@@ -75,7 +95,7 @@ def test_openai_web_call_start_returns_client_secret_when_configured(client, tes
     fake_response.raise_for_status.return_value = None
 
     # Act
-    with patch("app.routers.web_calls.httpx.post", return_value=fake_response) as fake_post:
+    with patch("app.routers.web_calls._openai_client.post", return_value=fake_response) as fake_post:
         response = client.post("/calls/web/openai")
 
     # Assert
@@ -91,6 +111,40 @@ def test_openai_web_call_start_returns_client_secret_when_configured(client, tes
     assert called_url == "https://api.openai.com/v1/realtime/client_secrets"
     assert called_kwargs["headers"]["Authorization"] == "Bearer sk-test-key"
     assert called_kwargs["json"]["session"]["model"] == "gpt-realtime"
+
+
+def test_openai_web_call_start_defaults_instructions_to_japanese_when_no_setting(client, test_settings):
+    # Arrange — no AppSetting row saved yet, DEFAULT_OPENAI_LANGUAGE = "ja"
+    test_settings.openai_api_key = "sk-test-key"
+    fake_response = MagicMock()
+    fake_response.json.return_value = {"value": "ek_test-secret", "expires_at": 1735689600}
+    fake_response.raise_for_status.return_value = None
+
+    # Act
+    with patch("app.routers.web_calls._openai_client.post", return_value=fake_response) as fake_post:
+        client.post("/calls/web/openai")
+
+    # Assert
+    instructions = fake_post.call_args.kwargs["json"]["session"]["instructions"]
+    assert "Japanese" in instructions
+
+
+def test_openai_web_call_start_uses_saved_language_setting(client, test_settings, db_session):
+    # Arrange
+    test_settings.openai_api_key = "sk-test-key"
+    db_session.add(AppSetting(key="openai_realtime_language", value="vi"))
+    db_session.commit()
+    fake_response = MagicMock()
+    fake_response.json.return_value = {"value": "ek_test-secret", "expires_at": 1735689600}
+    fake_response.raise_for_status.return_value = None
+
+    # Act
+    with patch("app.routers.web_calls._openai_client.post", return_value=fake_response) as fake_post:
+        client.post("/calls/web/openai")
+
+    # Assert
+    instructions = fake_post.call_args.kwargs["json"]["session"]["instructions"]
+    assert "Vietnamese" in instructions
 
 
 def test_openai_web_call_start_rejects_when_api_key_missing(client, test_settings):
@@ -113,7 +167,7 @@ def test_openai_web_call_start_returns_502_when_openai_errors(client, test_setti
 
     # Act
     with patch(
-        "app.routers.web_calls.httpx.post",
+        "app.routers.web_calls._openai_client.post",
         side_effect=httpx.HTTPStatusError("unauthorized", request=fake_request, response=fake_response),
     ):
         response = client.post("/calls/web/openai")

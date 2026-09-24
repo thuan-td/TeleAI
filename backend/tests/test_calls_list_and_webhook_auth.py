@@ -5,8 +5,11 @@ def test_list_calls_returns_created_call(client, sample_lead):
     response = client.get("/calls")
 
     assert response.status_code == 200
-    call_ids = [c["call_id"] for c in response.json()]
+    body = response.json()
+    call_ids = [c["call_id"] for c in body["items"]]
     assert call_id in call_ids
+    assert body["total"] >= 1
+    assert body["page"] == 1
 
 
 def test_webhook_rejects_wrong_secret_when_configured(client, sample_lead, test_settings):

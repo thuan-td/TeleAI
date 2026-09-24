@@ -1,6 +1,10 @@
+import uuid
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Fixed default org until multi-tenant auth is added (YAGNI — internal tool, no billing).
+DEFAULT_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
 
 class Settings(BaseSettings):

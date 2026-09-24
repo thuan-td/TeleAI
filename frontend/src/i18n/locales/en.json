@@ -1,0 +1,204 @@
+{
+  "common": {
+    "appName": "TeleApo Clone",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "unknownError": "Unknown reason"
+  },
+  "nav": {
+    "callMonitor": "Call Monitor",
+    "leads": "Leads",
+    "retellWebCallTest": "Retell Web Call Test",
+    "openaiWebCallTest": "OpenAI Web Call Test",
+    "agentConfig": "Agent Config"
+  },
+  "language": {
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "callMonitor": {
+    "title": "Call Monitor",
+    "loadError": "Failed to load call list: {{message}}",
+    "exportCsv": "Export CSV"
+  },
+  "calls": {
+    "filters": {
+      "searchLabel": "Search (call ID or lead)",
+      "searchPlaceholder": "Enter call ID, name or phone…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses",
+      "leadLabel": "Lead",
+      "leadAll": "All leads",
+      "dateFromLabel": "From date",
+      "dateToLabel": "To date",
+      "status": {
+        "dialing": "Dialing",
+        "in_progress": "In progress",
+        "ended": "Ended",
+        "failed": "Failed",
+        "invalid_number": "Invalid number",
+        "no_answer": "No answer",
+        "not_interested": "Not interested"
+      }
+    }
+  },
+  "pagination": {
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "audioPlayer": {
+    "noRecording": "No recording yet"
+  },
+  "callDetail": {
+    "emptyState": "Select a call to view details.",
+    "status": "Status:",
+    "transcript": "Transcript:",
+    "lead": "Lead:",
+    "startedAt": "Started:",
+    "endedAt": "Ended:",
+    "duration": "Duration:",
+    "transfer": "Transfer:",
+    "confidence": "Intent confidence:",
+    "lowConfidenceWarning": "below threshold",
+    "retryCount": "Retry count:",
+    "transcriptStatus": "Transcript status:",
+    "noTranscript": "No transcript yet."
+  },
+  "callList": {
+    "loading": "Loading call list…",
+    "empty": "No calls yet.",
+    "colTime": "Time",
+    "colLead": "Lead",
+    "colStatus": "Status",
+    "colDuration": "Duration",
+    "colTransfer": "Transfer",
+    "colConfidence": "Confidence",
+    "colRecording": "Recording"
+  },
+  "callTesterShell": {
+    "startButton": "Start call",
+    "stopButton": "End call",
+    "status": "Status:",
+    "errorPrefix": "Error:",
+    "state": {
+      "idle": "Not started",
+      "connecting": "Connecting…",
+      "active": "In progress",
+      "ended": "Ended",
+      "error": "Error"
+    }
+  },
+  "openaiWebCallTester": {
+    "badgeLabel": "Dev/Test only — OpenAI Realtime Web Call (not for production)",
+    "descriptionPrefix": "Test the speech-to-speech conversational ability of the",
+    "descriptionSuffix": "model directly in the browser via native WebRTC (no phone/SIP). Requires microphone access.",
+    "sdpRejected": "OpenAI Realtime rejected the WebRTC connection: {{status}}"
+  },
+  "webCallTester": {
+    "badgeLabel": "Dev/Test only — Web Call (not for production)",
+    "description": "Test the AI's voice conversation ability directly in the browser, in place of a real phone call via Twilio (phone number pending). Requires microphone access."
+  },
+  "leads": {
+    "title": "Lead Management",
+    "createButton": "+ New Lead",
+    "loadError": "Failed to load lead list: {{message}}",
+    "filters": {
+      "searchLabel": "Search (name or phone)",
+      "searchPlaceholder": "Enter name or phone number…",
+      "statusLabel": "Status",
+      "langLabel": "Language",
+      "statusAll": "All statuses",
+      "statusNew": "New",
+      "statusInvalidNumber": "Invalid number",
+      "statusNoAnswer": "No answer",
+      "langAll": "All languages",
+      "langJa": "Japanese",
+      "langVi": "Vietnamese"
+    },
+    "table": {
+      "loading": "Loading leads…",
+      "empty": "No leads yet.",
+      "colName": "Name",
+      "colPhone": "Phone",
+      "colLang": "Language",
+      "colStatus": "Status",
+      "colCreatedAt": "Created at",
+      "colAction": "Action",
+      "dialedMessage": "Called {{name}}",
+      "dialNotWhitelisted": "Number is not in the whitelist",
+      "dialError": "Call failed: {{message}}",
+      "deleteConfirm": "Delete lead \"{{name}}\"?",
+      "deleteError": "Failed to delete lead: {{message}}",
+      "dialButton": "Call",
+      "dialing": "Calling…"
+    },
+    "form": {
+      "editTitle": "Edit lead",
+      "createTitle": "Create new lead",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+84900000000",
+      "nameLabel": "Lead name",
+      "namePlaceholder": "Test Customer",
+      "langLabel": "Language",
+      "langJa": "Japanese",
+      "langVi": "Vietnamese",
+      "validationError": "Phone number and name cannot be empty"
+    }
+  },
+  "agentConfig": {
+    "title": "Agent Config",
+    "metaLine": "{{name}} · version {{version}} · {{publishStatus}}",
+    "published": "published",
+    "notPublished": "not published",
+    "saveButton": "Save",
+    "saving": "Saving…",
+    "loading": "Loading agent config…",
+    "loadError": "Failed to load agent config: {{message}}",
+    "customLlmNotice": "This agent uses a custom LLM/conversation flow — the prompt cannot be edited here.",
+    "saveResult": {
+      "saveErrorPrefix": "Save failed:",
+      "savedNotPublished": "Saved but NOT applied yet: {{reason}}",
+      "publishFailedFallback": "publish failed",
+      "savedAndPublished": "Saved and applied successfully."
+    },
+    "promptEditor": {
+      "title": "Prompt / Script",
+      "beginMessageLabel": "Opening message (begin_message)",
+      "beginMessagePlaceholder": "Hello, this is...",
+      "generalPromptLabel": "System prompt (general_prompt)",
+      "generalPromptPlaceholder": "You are the call center assistant for...",
+      "charCount": "{{count}} characters"
+    },
+    "voicePicker": {
+      "title": "Voice",
+      "searchPlaceholder": "Search by name, gender, accent…",
+      "empty": "No matching voice found.",
+      "previewTitle": "Preview"
+    },
+    "behaviorSliders": {
+      "title": "Conversation behavior",
+      "defaultNote": "Retell's default is 1 for both values.",
+      "responsivenessLabel": "Responsiveness",
+      "interruptionSensitivityLabel": "Interruption sensitivity"
+    },
+    "systemIntentThreshold": {
+      "title": "System configuration",
+      "note": "Applied on the backend when deciding warm-transfer. NOT sent to Retell.",
+      "thresholdLabel": "Intent-confidence threshold"
+    },
+    "openaiRealtimeLanguage": {
+      "label": "AI spoken language (OpenAI Realtime Web Call Test)",
+      "note": "Applies to the separate OpenAI Realtime test tool (not Retell). OpenAI has no direct language option, this is enforced via prompt so accuracy isn't guaranteed.",
+      "options": {
+        "vi": "Vietnamese",
+        "ja": "Japanese",
+        "en": "English"
+      }
+    }
+  }
+}

@@ -16,7 +16,8 @@ def test_list_leads_returns_created_lead(client):
     response = client.get("/leads")
 
     assert response.status_code == 200
-    lead_ids = [lead["id"] for lead in response.json()]
+    body = response.json()
+    lead_ids = [lead["id"] for lead in body["items"]]
     assert lead_id in lead_ids
 
 

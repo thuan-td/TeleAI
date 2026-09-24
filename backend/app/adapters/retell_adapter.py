@@ -75,6 +75,67 @@ class RetellAdapter(VoiceProvider):
             "Confirm with Retell support before implementing this."
         )
 
+    # --- Agent config admin methods (phase-03) ---
+    # Not part of VoiceProvider interface (same precedent as create_web_call
+    # above) — these are admin/config operations, not call operations.
+    # Verified against docs.retellai.com (2026-09-24), see
+    # plans/20260924-1030-teleapo-dashboard-ui/phase-03-agent-config.md.
+
+    def get_agent(self, agent_id: str) -> dict[str, Any]:
+        response = self._client.get(f"/get-agent/{agent_id}")
+        response.raise_for_status()
+        return response.json()
+
+    def update_agent(self, agent_id: str, fields: dict[str, Any], version: int | None = None) -> dict[str, Any]:
+        params = {"version": version} if version is not None else None
+        response = self._client.patch(f"/update-agent/{agent_id}", json=fields, params=params)
+        response.raise_for_status()
+        return response.json()
+
+    def create_agent_version(self, agent_id: str, base_version: int) -> dict[str, Any]:
+        """A published agent version is immutable except its version_title
+        (PATCH /update-agent 422s "Cannot update published agent other than
+        version title" — confirmed via docs.retellai.com 2026-09-24). Editing
+        any other field requires cloning a new draft version here first, then
+        PATCHing that draft version (see patch_agent_config in agent_config.py)."""
+        response = self._client.post(
+            f"/create-agent-version/{agent_id}", json={"base_version": base_version}
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_llm(self, llm_id: str) -> dict[str, Any]:
+        response = self._client.get(f"/get-retell-llm/{llm_id}")
+        response.raise_for_status()
+        return response.json()
+
+    def update_llm(self, llm_id: str, fields: dict[str, Any]) -> dict[str, Any]:
+        response = self._client.patch(f"/update-retell-llm/{llm_id}", json=fields)
+        response.raise_for_status()
+        return response.json()
+
+    def create_llm(self, fields: dict[str, Any]) -> dict[str, Any]:
+        """A published LLM is immutable (PATCH /update-retell-llm returns 400
+        "Cannot update published LLM" — confirmed via docs.retellai.com
+        2026-09-24). Editing a published agent's prompt requires creating a
+        NEW LLM here, then pointing the agent's response_engine.llm_id at it
+        (see patch_agent_config in agent_config.py)."""
+        response = self._client.post("/create-retell-llm", json=fields)
+        response.raise_for_status()
+        return response.json()
+
+    def list_voices(self) -> list[dict[str, Any]]:
+        response = self._client.get("/list-voices")
+        response.raise_for_status()
+        return response.json()
+
+    def publish_agent_version(self, agent_id: str, version: int) -> dict[str, Any]:
+        response = self._client.post(f"/publish-agent-version/{agent_id}", json={"version": version})
+        response.raise_for_status()
+        # Retell returns 200 with an empty body on success here (unlike the
+        # other endpoints above) — .json() on empty content raises.
+        return response.json() if response.content else {}
+
     def parse_webhook(self, payload: dict[str, Any]) -> WebhookEventData:
         call = payload.get("call", {})
         call_id = call.get("call_id", "")

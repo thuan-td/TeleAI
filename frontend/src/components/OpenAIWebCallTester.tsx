@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { startOpenAIWebCall } from "../api/calls";
-
-type CallState = "idle" | "connecting" | "active" | "ended" | "error";
+import { CallTesterShell, type CallState } from "./call-tester-shell";
 
 const OPENAI_REALTIME_CALLS_URL = "https://api.openai.com/v1/realtime/calls";
 
 export function OpenAIWebCallTester() {
+  const { t } = useTranslation();
   const [callState, setCallState] = useState<CallState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -62,7 +63,7 @@ export function OpenAIWebCallTester() {
         },
       });
       if (!sdpResponse.ok) {
-        throw new Error(`OpenAI Realtime từ chối kết nối WebRTC: ${sdpResponse.status}`);
+        throw new Error(t("openaiWebCallTester.sdpRejected", { status: sdpResponse.status }));
       }
       const answerSdp = await sdpResponse.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
@@ -80,51 +81,23 @@ export function OpenAIWebCallTester() {
     setCallState("ended");
   }, [cleanup]);
 
-  const statusLabel: Record<CallState, string> = {
-    idle: "Chưa bắt đầu",
-    connecting: "Đang kết nối…",
-    active: "Đang nói chuyện",
-    ended: "Đã kết thúc",
-    error: "Lỗi",
-  };
-
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6">
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-950">
-        ⚠️ Dev/Test only — OpenAI Realtime Web Call (không dùng cho production)
-      </span>
-      <p className="text-sm text-slate-600">
-        Test khả năng đối đáp giọng nói speech-to-speech của model <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">gpt-realtime</code> ngay
-        trong trình duyệt qua WebRTC thuần (không phone/SIP). Yêu cầu quyền micro.
-      </p>
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={handleStart}
-          disabled={callState === "connecting" || callState === "active"}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Bắt đầu nói chuyện
-        </button>
-        <button
-          type="button"
-          onClick={handleStop}
-          disabled={callState !== "active" && callState !== "connecting"}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Kết thúc
-        </button>
-      </div>
-      <p className="text-sm text-slate-600">
-        Trạng thái: <span className="font-medium text-slate-900">{statusLabel[callState]}</span>
-      </p>
-      {errorMessage && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-          Lỗi: {errorMessage}
-        </p>
-      )}
+    <CallTesterShell
+      badgeLabel={t("openaiWebCallTester.badgeLabel")}
+      description={
+        <>
+          {t("openaiWebCallTester.descriptionPrefix")}{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">gpt-realtime</code>{" "}
+          {t("openaiWebCallTester.descriptionSuffix")}
+        </>
+      }
+      callState={callState}
+      errorMessage={errorMessage}
+      onStart={handleStart}
+      onStop={handleStop}
+    >
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioElRef} autoPlay className="w-full" />
-    </div>
+    </CallTesterShell>
   );
 }

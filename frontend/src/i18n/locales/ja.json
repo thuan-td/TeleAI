@@ -1,0 +1,204 @@
+{
+  "common": {
+    "appName": "TeleApo Clone",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "loading": "読み込み中…",
+    "unknownError": "原因不明"
+  },
+  "nav": {
+    "callMonitor": "コールモニター",
+    "leads": "リード",
+    "retellWebCallTest": "Retell Web通話テスト",
+    "openaiWebCallTest": "OpenAI Web通話テスト",
+    "agentConfig": "エージェント設定"
+  },
+  "language": {
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "callMonitor": {
+    "title": "コールモニター",
+    "loadError": "通話一覧の取得に失敗しました: {{message}}",
+    "exportCsv": "CSVを出力"
+  },
+  "calls": {
+    "filters": {
+      "searchLabel": "検索（通話IDまたはリード）",
+      "searchPlaceholder": "通話ID、氏名、電話番号を入力…",
+      "statusLabel": "ステータス",
+      "statusAll": "すべてのステータス",
+      "leadLabel": "リード",
+      "leadAll": "すべてのリード",
+      "dateFromLabel": "開始日",
+      "dateToLabel": "終了日",
+      "status": {
+        "dialing": "発信中",
+        "in_progress": "進行中",
+        "ended": "終了",
+        "failed": "失敗",
+        "invalid_number": "無効な番号",
+        "no_answer": "応答なし",
+        "not_interested": "興味なし"
+      }
+    }
+  },
+  "pagination": {
+    "prev": "前へ",
+    "next": "次へ"
+  },
+  "audioPlayer": {
+    "noRecording": "録音はまだありません"
+  },
+  "callDetail": {
+    "emptyState": "詳細を表示する通話を選択してください。",
+    "status": "ステータス:",
+    "transcript": "文字起こし:",
+    "lead": "リード:",
+    "startedAt": "開始:",
+    "endedAt": "終了:",
+    "duration": "通話時間:",
+    "transfer": "転送:",
+    "confidence": "インテント信頼度:",
+    "lowConfidenceWarning": "しきい値未満",
+    "retryCount": "再試行回数:",
+    "transcriptStatus": "文字起こしステータス:",
+    "noTranscript": "文字起こしはまだありません。"
+  },
+  "callList": {
+    "loading": "通話一覧を読み込み中…",
+    "empty": "通話はまだありません。",
+    "colTime": "日時",
+    "colLead": "リード",
+    "colStatus": "ステータス",
+    "colDuration": "通話時間",
+    "colTransfer": "転送",
+    "colConfidence": "信頼度",
+    "colRecording": "録音"
+  },
+  "callTesterShell": {
+    "startButton": "通話を開始",
+    "stopButton": "通話を終了",
+    "status": "ステータス:",
+    "errorPrefix": "エラー:",
+    "state": {
+      "idle": "未開始",
+      "connecting": "接続中…",
+      "active": "通話中",
+      "ended": "終了しました",
+      "error": "エラー"
+    }
+  },
+  "openaiWebCallTester": {
+    "badgeLabel": "開発・テスト専用 — OpenAI Realtime Web通話（本番環境では使用不可）",
+    "descriptionPrefix": "ブラウザ上でネイティブWebRTCを使い、",
+    "descriptionSuffix": "モデルの音声対音声リアルタイム会話能力をテストします（電話/SIPは使用しません）。マイクの許可が必要です。",
+    "sdpRejected": "OpenAI RealtimeがWebRTC接続を拒否しました: {{status}}"
+  },
+  "webCallTester": {
+    "badgeLabel": "開発・テスト専用 — Web通話（本番環境では使用不可）",
+    "description": "Twilio経由の実際の電話発信（電話番号取得待ち）の代わりに、ブラウザ上でAIの音声対話能力をテストします。マイクの許可が必要です。"
+  },
+  "leads": {
+    "title": "リード管理",
+    "createButton": "＋ リードを作成",
+    "loadError": "リード一覧の取得に失敗しました: {{message}}",
+    "filters": {
+      "searchLabel": "検索（氏名または電話番号）",
+      "searchPlaceholder": "氏名または電話番号を入力…",
+      "statusLabel": "ステータス",
+      "langLabel": "言語",
+      "statusAll": "すべてのステータス",
+      "statusNew": "新規",
+      "statusInvalidNumber": "無効な番号",
+      "statusNoAnswer": "応答なし",
+      "langAll": "すべての言語",
+      "langJa": "日本語",
+      "langVi": "ベトナム語"
+    },
+    "table": {
+      "loading": "リード一覧を読み込み中…",
+      "empty": "リードはまだありません。",
+      "colName": "氏名",
+      "colPhone": "電話番号",
+      "colLang": "言語",
+      "colStatus": "ステータス",
+      "colCreatedAt": "作成日時",
+      "colAction": "操作",
+      "dialedMessage": "{{name}}様に発信しました",
+      "dialNotWhitelisted": "この番号はホワイトリストに登録されていません",
+      "dialError": "発信に失敗しました: {{message}}",
+      "deleteConfirm": "リード「{{name}}」を削除しますか？",
+      "deleteError": "リードの削除に失敗しました: {{message}}",
+      "dialButton": "発信",
+      "dialing": "発信中…"
+    },
+    "form": {
+      "editTitle": "リードを編集",
+      "createTitle": "新規リード作成",
+      "phoneLabel": "電話番号",
+      "phonePlaceholder": "+84900000000",
+      "nameLabel": "リード名",
+      "namePlaceholder": "テスト顧客",
+      "langLabel": "言語",
+      "langJa": "日本語",
+      "langVi": "ベトナム語",
+      "validationError": "電話番号と氏名は必須です"
+    }
+  },
+  "agentConfig": {
+    "title": "エージェント設定",
+    "metaLine": "{{name}} ・バージョン {{version}} ・{{publishStatus}}",
+    "published": "公開済み",
+    "notPublished": "未公開",
+    "saveButton": "保存",
+    "saving": "保存中…",
+    "loading": "エージェント設定を読み込み中…",
+    "loadError": "エージェント設定の取得に失敗しました: {{message}}",
+    "customLlmNotice": "このエージェントはカスタムLLM/会話フローを使用しているため、こちらではプロンプトを編集できません。",
+    "saveResult": {
+      "saveErrorPrefix": "保存に失敗しました:",
+      "savedNotPublished": "保存しましたが、まだ適用されていません: {{reason}}",
+      "publishFailedFallback": "公開に失敗しました",
+      "savedAndPublished": "保存し、正常に適用されました。"
+    },
+    "promptEditor": {
+      "title": "プロンプト／スクリプト",
+      "beginMessageLabel": "冒頭メッセージ（begin_message）",
+      "beginMessagePlaceholder": "お電話ありがとうございます、私は...",
+      "generalPromptLabel": "システムプロンプト（general_prompt）",
+      "generalPromptPlaceholder": "あなたはコールセンターの担当エージェントです...",
+      "charCount": "{{count}} 文字"
+    },
+    "voicePicker": {
+      "title": "音声（ボイス）",
+      "searchPlaceholder": "名前・性別・アクセントで検索…",
+      "empty": "該当する音声が見つかりません。",
+      "previewTitle": "試聴"
+    },
+    "behaviorSliders": {
+      "title": "会話の挙動",
+      "defaultNote": "Retellのデフォルト値は両方とも1です。",
+      "responsivenessLabel": "応答性（レスポンスの速さ）",
+      "interruptionSensitivityLabel": "割り込み感度"
+    },
+    "systemIntentThreshold": {
+      "title": "システム設定",
+      "note": "ウォームトランスファーの判定にバックエンドで使用されます。Retellへは送信されません。",
+      "thresholdLabel": "インテント信頼度のしきい値"
+    },
+    "openaiRealtimeLanguage": {
+      "label": "AIの発話言語（OpenAI Realtime Web通話テスト）",
+      "note": "独立したOpenAI Realtimeテストツール専用（Retellではありません）。OpenAIには直接の言語オプションがなく、プロンプトで制御するため精度は保証されません。",
+      "options": {
+        "vi": "ベトナム語",
+        "ja": "日本語",
+        "en": "英語"
+      }
+    }
+  }
+}

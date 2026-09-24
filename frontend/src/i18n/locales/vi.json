@@ -1,0 +1,204 @@
+{
+  "common": {
+    "appName": "TeleApo Clone",
+    "save": "Lưu",
+    "saving": "Đang lưu…",
+    "cancel": "Hủy",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "loading": "Đang tải…",
+    "unknownError": "Không rõ nguyên nhân"
+  },
+  "nav": {
+    "callMonitor": "Call Monitor",
+    "leads": "Leads",
+    "retellWebCallTest": "Retell Web Call Test",
+    "openaiWebCallTest": "OpenAI Web Call Test",
+    "agentConfig": "Cấu hình Agent"
+  },
+  "language": {
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "ja": "日本語"
+  },
+  "callMonitor": {
+    "title": "Call Monitor",
+    "loadError": "Lỗi tải danh sách cuộc gọi: {{message}}",
+    "exportCsv": "Xuất CSV"
+  },
+  "calls": {
+    "filters": {
+      "searchLabel": "Tìm kiếm (call ID hoặc lead)",
+      "searchPlaceholder": "Nhập call ID, tên hoặc SĐT…",
+      "statusLabel": "Trạng thái",
+      "statusAll": "Tất cả trạng thái",
+      "leadLabel": "Lead",
+      "leadAll": "Tất cả lead",
+      "dateFromLabel": "Từ ngày",
+      "dateToLabel": "Đến ngày",
+      "status": {
+        "dialing": "Đang gọi",
+        "in_progress": "Đang diễn ra",
+        "ended": "Đã kết thúc",
+        "failed": "Thất bại",
+        "invalid_number": "Số không hợp lệ",
+        "no_answer": "Không nghe máy",
+        "not_interested": "Không quan tâm"
+      }
+    }
+  },
+  "pagination": {
+    "prev": "Trước",
+    "next": "Sau"
+  },
+  "audioPlayer": {
+    "noRecording": "Chưa có recording"
+  },
+  "callDetail": {
+    "emptyState": "Chọn một cuộc gọi để xem chi tiết.",
+    "status": "Trạng thái:",
+    "transcript": "Transcript:",
+    "lead": "Lead:",
+    "startedAt": "Bắt đầu:",
+    "endedAt": "Kết thúc:",
+    "duration": "Thời lượng:",
+    "transfer": "Transfer:",
+    "confidence": "Intent confidence:",
+    "lowConfidenceWarning": "dưới ngưỡng",
+    "retryCount": "Số lần thử lại:",
+    "transcriptStatus": "Trạng thái transcript:",
+    "noTranscript": "Chưa có transcript."
+  },
+  "callList": {
+    "loading": "Đang tải danh sách cuộc gọi…",
+    "empty": "Chưa có cuộc gọi nào.",
+    "colTime": "Thời gian",
+    "colLead": "Lead",
+    "colStatus": "Trạng thái",
+    "colDuration": "Thời lượng",
+    "colTransfer": "Transfer",
+    "colConfidence": "Confidence",
+    "colRecording": "Ghi âm"
+  },
+  "callTesterShell": {
+    "startButton": "Bắt đầu nói chuyện",
+    "stopButton": "Kết thúc",
+    "status": "Trạng thái:",
+    "errorPrefix": "Lỗi:",
+    "state": {
+      "idle": "Chưa bắt đầu",
+      "connecting": "Đang kết nối…",
+      "active": "Đang nói chuyện",
+      "ended": "Đã kết thúc",
+      "error": "Lỗi"
+    }
+  },
+  "openaiWebCallTester": {
+    "badgeLabel": "Dev/Test only — OpenAI Realtime Web Call (không dùng cho production)",
+    "descriptionPrefix": "Test khả năng đối đáp giọng nói speech-to-speech của model",
+    "descriptionSuffix": "ngay trong trình duyệt qua WebRTC thuần (không phone/SIP). Yêu cầu quyền micro.",
+    "sdpRejected": "OpenAI Realtime từ chối kết nối WebRTC: {{status}}"
+  },
+  "webCallTester": {
+    "badgeLabel": "Dev/Test only — Web Call (không dùng cho production)",
+    "description": "Test khả năng đối đáp giọng nói của AI ngay trong trình duyệt, thay cho việc gọi điện thoại thật qua Twilio (đang chờ số điện thoại). Yêu cầu quyền micro."
+  },
+  "leads": {
+    "title": "Quản lý Lead",
+    "createButton": "+ Tạo lead",
+    "loadError": "Lỗi tải danh sách lead: {{message}}",
+    "filters": {
+      "searchLabel": "Tìm kiếm (tên hoặc SĐT)",
+      "searchPlaceholder": "Nhập tên hoặc số điện thoại…",
+      "statusLabel": "Trạng thái",
+      "langLabel": "Ngôn ngữ",
+      "statusAll": "Tất cả trạng thái",
+      "statusNew": "Mới",
+      "statusInvalidNumber": "Số không hợp lệ",
+      "statusNoAnswer": "Không nghe máy",
+      "langAll": "Tất cả ngôn ngữ",
+      "langJa": "Tiếng Nhật",
+      "langVi": "Tiếng Việt"
+    },
+    "table": {
+      "loading": "Đang tải danh sách lead…",
+      "empty": "Chưa có lead nào.",
+      "colName": "Tên",
+      "colPhone": "SĐT",
+      "colLang": "Ngôn ngữ",
+      "colStatus": "Trạng thái",
+      "colCreatedAt": "Tạo lúc",
+      "colAction": "Hành động",
+      "dialedMessage": "Đã gọi {{name}}",
+      "dialNotWhitelisted": "Số không nằm trong whitelist",
+      "dialError": "Lỗi gọi: {{message}}",
+      "deleteConfirm": "Xóa lead \"{{name}}\"?",
+      "deleteError": "Lỗi xóa lead: {{message}}",
+      "dialButton": "Gọi",
+      "dialing": "Đang gọi…"
+    },
+    "form": {
+      "editTitle": "Sửa lead",
+      "createTitle": "Tạo lead mới",
+      "phoneLabel": "Số điện thoại",
+      "phonePlaceholder": "+84900000000",
+      "nameLabel": "Tên lead",
+      "namePlaceholder": "Khach Test",
+      "langLabel": "Ngôn ngữ",
+      "langJa": "Tiếng Nhật",
+      "langVi": "Tiếng Việt",
+      "validationError": "Số điện thoại và tên không được để trống"
+    }
+  },
+  "agentConfig": {
+    "title": "Cấu hình Agent",
+    "metaLine": "{{name}} · phiên bản {{version}} · {{publishStatus}}",
+    "published": "đã publish",
+    "notPublished": "chưa publish",
+    "saveButton": "Lưu",
+    "saving": "Đang lưu…",
+    "loading": "Đang tải cấu hình agent…",
+    "loadError": "Lỗi tải cấu hình agent: {{message}}",
+    "customLlmNotice": "Agent này dùng custom-llm/conversation-flow, không sửa prompt tại đây được.",
+    "saveResult": {
+      "saveErrorPrefix": "Lỗi khi lưu:",
+      "savedNotPublished": "Đã lưu nhưng CHƯA áp dụng: {{reason}}",
+      "publishFailedFallback": "publish thất bại",
+      "savedAndPublished": "Đã lưu và áp dụng thành công."
+    },
+    "promptEditor": {
+      "title": "Prompt / Kịch bản",
+      "beginMessageLabel": "Câu mở đầu (begin_message)",
+      "beginMessagePlaceholder": "Xin chào, tôi là...",
+      "generalPromptLabel": "Prompt hệ thống (general_prompt)",
+      "generalPromptPlaceholder": "Bạn là trợ lý tổng đài của...",
+      "charCount": "{{count}} ký tự"
+    },
+    "voicePicker": {
+      "title": "Giọng nói (voice)",
+      "searchPlaceholder": "Tìm theo tên, giới tính, accent…",
+      "empty": "Không tìm thấy voice phù hợp.",
+      "previewTitle": "Nghe thử"
+    },
+    "behaviorSliders": {
+      "title": "Hành vi hội thoại",
+      "defaultNote": "Mặc định của Retell là 1 cho cả hai giá trị.",
+      "responsivenessLabel": "Responsiveness (độ phản hồi nhanh)",
+      "interruptionSensitivityLabel": "Interruption sensitivity (độ nhạy ngắt lời)"
+    },
+    "systemIntentThreshold": {
+      "title": "Cấu hình hệ thống",
+      "note": "Áp dụng ở backend khi quyết định warm-transfer. KHÔNG gửi sang Retell.",
+      "thresholdLabel": "Ngưỡng intent-confidence"
+    },
+    "openaiRealtimeLanguage": {
+      "label": "Ngôn ngữ AI nói (OpenAI Realtime Web Call Test)",
+      "note": "Áp dụng cho công cụ test OpenAI Realtime riêng biệt (không phải Retell). OpenAI không có tuỳ chọn ngôn ngữ trực tiếp, hệ thống ép qua prompt nên độ chính xác không tuyệt đối.",
+      "options": {
+        "vi": "Tiếng Việt",
+        "ja": "Tiếng Nhật",
+        "en": "Tiếng Anh"
+      }
+    }
+  }
+}

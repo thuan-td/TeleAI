@@ -1,15 +1,22 @@
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.adapters.retell_adapter import RetellAdapter
 from app.core.config import Settings, get_settings
+from app.db.session import get_db
 from app.dependencies import get_voice_provider
+from app.services.app_settings import OPENAI_LANGUAGE_NAMES, get_openai_language
 
 router = APIRouter(prefix="/calls", tags=["calls"])
 
 OPENAI_REALTIME_MODEL = "gpt-realtime"
 OPENAI_CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets"
+
+# Reused across requests instead of opening a new connection per call (httpx.post
+# would do a fresh TCP+TLS handshake every time).
+_openai_client = httpx.Client(timeout=30.0)
 
 
 class WebCallResponse(BaseModel):
@@ -38,13 +45,31 @@ def start_web_call(
     if not settings.retell_agent_id:
         raise HTTPException(status_code=503, detail="Thiếu RETELL_AGENT_ID trong cấu hình")
 
-    access_token = provider.create_web_call(settings.retell_agent_id)
+    try:
+        access_token = provider.create_web_call(settings.retell_agent_id)
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=502, detail=f"Retell trả lỗi khi tạo web call: {exc.response.status_code}"
+        ) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"Không gọi được Retell API: {exc}") from exc
+
     return WebCallResponse(access_token=access_token)
+
+
+def _build_language_instructions(language: str) -> str:
+    """OpenAI Realtime has no dedicated output-language field (confirmed via
+    docs research 2026-09-24) — spoken language is only steerable through
+    `instructions` text. Reliability is model-dependent (medium confidence),
+    accepted for this dev/test-only tool."""
+    language_name = OPENAI_LANGUAGE_NAMES.get(language, OPENAI_LANGUAGE_NAMES["ja"])
+    return f"You are a helpful voice assistant. Respond exclusively in {language_name}, regardless of the language the user speaks. Never switch to another language."
 
 
 @router.post("/web/openai", response_model=OpenAIWebCallResponse, status_code=201)
 def start_openai_web_call(
     settings: Settings = Depends(get_settings),
+    db: Session = Depends(get_db),
 ) -> OpenAIWebCallResponse:
     """Dev/test-only: mint an OpenAI Realtime ephemeral client secret for a browser WebRTC test session.
 
@@ -59,8 +84,10 @@ def start_openai_web_call(
     if not settings.openai_api_key:
         raise HTTPException(status_code=503, detail="OpenAI chưa được cấu hình (OPENAI_API_KEY trống)")
 
+    language = get_openai_language(db)
+
     try:
-        response = httpx.post(
+        response = _openai_client.post(
             OPENAI_CLIENT_SECRETS_URL,
             headers={
                 "Authorization": f"Bearer {settings.openai_api_key}",
@@ -70,9 +97,9 @@ def start_openai_web_call(
                 "session": {
                     "type": "realtime",
                     "model": OPENAI_REALTIME_MODEL,
+                    "instructions": _build_language_instructions(language),
                 }
             },
-            timeout=30.0,
         )
         response.raise_for_status()
     except httpx.HTTPStatusError as exc:
