@@ -180,6 +180,15 @@
       "empty": "該当する音声が見つかりません。",
       "previewTitle": "試聴"
     },
+    "languagePicker": {
+      "title": "エージェント言語",
+      "note": "Retellの音声認識言語です。上で選択したボイスと一致している必要があります（非対応の組み合わせはRetell側で拒否されます）。",
+      "options": {
+        "vi-VN": "ベトナム語",
+        "ja-JP": "日本語",
+        "en-US": "英語（米国）"
+      }
+    },
     "behaviorSliders": {
       "title": "会話の挙動",
       "defaultNote": "Retellのデフォルト値は両方とも1です。",
@@ -191,13 +200,32 @@
       "note": "ウォームトランスファーの判定にバックエンドで使用されます。Retellへは送信されません。",
       "thresholdLabel": "インテント信頼度のしきい値"
     },
+    "tabs": {
+      "retell": "Retell",
+      "openai": "OpenAI Realtime"
+    },
     "openaiRealtimeLanguage": {
-      "label": "AIの発話言語（OpenAI Realtime Web通話テスト）",
+      "title": "OpenAI Realtime Web通話テスト",
+      "label": "AIの発話言語",
       "note": "独立したOpenAI Realtimeテストツール専用（Retellではありません）。OpenAIには直接の言語オプションがなく、プロンプトで制御するため精度は保証されません。",
       "options": {
         "vi": "ベトナム語",
         "ja": "日本語",
         "en": "英語"
+      }
+    },
+    "openaiRealtimePrompt": {
+      "label": "プロンプト（instructions）",
+      "note": "AIへの指示内容です。下の言語指定は自動的に末尾に追加されます。",
+      "placeholder": "あなたは不動産会社の担当エージェントです..."
+    },
+    "openaiRealtimeVoice": {
+      "label": "音声",
+      "note": "OpenAIはこれらの音声の性別・出身地を公式には公開していません。以下のラベルはコミュニティの反応に基づく推定であり、信頼度は低いです。",
+      "genderHints": {
+        "male": "男性・推定",
+        "female": "女性・推定",
+        "unknown": "不明"
       }
     }
   }

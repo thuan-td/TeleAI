@@ -180,6 +180,15 @@
       "empty": "Không tìm thấy voice phù hợp.",
       "previewTitle": "Nghe thử"
     },
+    "languagePicker": {
+      "title": "Ngôn ngữ agent",
+      "note": "Ngôn ngữ nhận diện giọng nói của Retell. Cần khớp với voice đã chọn ở trên (Retell tự chặn nếu không tương thích).",
+      "options": {
+        "vi-VN": "Tiếng Việt",
+        "ja-JP": "Tiếng Nhật",
+        "en-US": "Tiếng Anh (Mỹ)"
+      }
+    },
     "behaviorSliders": {
       "title": "Hành vi hội thoại",
       "defaultNote": "Mặc định của Retell là 1 cho cả hai giá trị.",
@@ -191,13 +200,32 @@
       "note": "Áp dụng ở backend khi quyết định warm-transfer. KHÔNG gửi sang Retell.",
       "thresholdLabel": "Ngưỡng intent-confidence"
     },
+    "tabs": {
+      "retell": "Retell",
+      "openai": "OpenAI Realtime"
+    },
     "openaiRealtimeLanguage": {
-      "label": "Ngôn ngữ AI nói (OpenAI Realtime Web Call Test)",
+      "title": "OpenAI Realtime Web Call Test",
+      "label": "Ngôn ngữ AI nói",
       "note": "Áp dụng cho công cụ test OpenAI Realtime riêng biệt (không phải Retell). OpenAI không có tuỳ chọn ngôn ngữ trực tiếp, hệ thống ép qua prompt nên độ chính xác không tuyệt đối.",
       "options": {
         "vi": "Tiếng Việt",
         "ja": "Tiếng Nhật",
         "en": "Tiếng Anh"
+      }
+    },
+    "openaiRealtimePrompt": {
+      "label": "Prompt (instructions)",
+      "note": "Nội dung hướng dẫn AI. Câu ép ngôn ngữ ở dưới sẽ tự động nối thêm vào cuối.",
+      "placeholder": "Bạn là trợ lý bất động sản của Công ty..."
+    },
+    "openaiRealtimeVoice": {
+      "label": "Giọng nói",
+      "note": "OpenAI không công bố chính thức giới tính/xuất xứ cho các giọng này — nhãn dưới đây chỉ là ước lượng từ phản hồi cộng đồng, độ tin cậy thấp.",
+      "genderHints": {
+        "male": "nam · ước lượng",
+        "female": "nữ · ước lượng",
+        "unknown": "chưa rõ"
       }
     }
   }

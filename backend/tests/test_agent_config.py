@@ -58,6 +58,8 @@ def test_get_agent_config_merges_agent_llm_and_local_threshold(client, test_sett
     assert data["voice_id"] == "voice-1"
     assert data["intent_confidence_threshold"] == 0.65
     assert data["openai_realtime_language"] == "ja"
+    assert data["openai_realtime_prompt"] == ""
+    assert data["openai_realtime_voice"] == "marin"
     app.dependency_overrides.pop(get_retell_admin_client, None)
 
 
@@ -250,6 +252,46 @@ def test_patch_agent_config_rejects_unsupported_openai_realtime_language(client,
 
     # Act
     response = client.patch("/agent/config", json={"openai_realtime_language": "fr", "publish": False})
+
+    # Assert
+    assert response.status_code == 422
+
+
+def test_patch_agent_config_saves_openai_realtime_prompt_and_voice(client, test_settings, db_session):
+    # Arrange — app-local only, no Retell call needed
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+    admin = _fake_admin()
+    app.dependency_overrides[get_retell_admin_client] = lambda: admin
+
+    # Act
+    response = client.patch(
+        "/agent/config",
+        json={
+            "openai_realtime_prompt": "You sell Tokyo real estate.",
+            "openai_realtime_voice": "cedar",
+            "publish": False,
+        },
+    )
+
+    # Assert
+    assert response.status_code == 200
+    admin.update_agent.assert_not_called()
+    admin.update_llm.assert_not_called()
+    data = response.json()
+    assert data["updated_local"] is True
+    assert db_session.get(AppSetting, "openai_realtime_prompt").value == "You sell Tokyo real estate."
+    assert db_session.get(AppSetting, "openai_realtime_voice").value == "cedar"
+    app.dependency_overrides.pop(get_retell_admin_client, None)
+
+
+def test_patch_agent_config_rejects_unsupported_openai_realtime_voice(client, test_settings):
+    # Arrange
+    test_settings.retell_api_key = "sk-test"
+    test_settings.retell_agent_id = AGENT_ID
+
+    # Act
+    response = client.patch("/agent/config", json={"openai_realtime_voice": "not-a-real-voice", "publish": False})
 
     # Assert
     assert response.status_code == 422

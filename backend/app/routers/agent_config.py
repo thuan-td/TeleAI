@@ -12,10 +12,15 @@ from app.db.session import get_db
 from app.dependencies import get_retell_admin_client
 from app.services.app_settings import (
     OPENAI_LANGUAGE_NAMES,
+    OPENAI_VOICES,
     get_intent_threshold,
     get_openai_language,
+    get_openai_prompt,
+    get_openai_voice,
     set_intent_threshold,
     set_openai_language,
+    set_openai_prompt,
+    set_openai_voice,
 )
 
 router = APIRouter(prefix="/agent", tags=["agent-config"])
@@ -41,6 +46,8 @@ class AgentConfigResponse(BaseModel):
     interruption_sensitivity: float | None
     intent_confidence_threshold: float
     openai_realtime_language: str
+    openai_realtime_prompt: str
+    openai_realtime_voice: str
 
 
 class AgentConfigUpdate(BaseModel):
@@ -52,6 +59,8 @@ class AgentConfigUpdate(BaseModel):
     interruption_sensitivity: float | None = Field(None, ge=0, le=1)
     intent_confidence_threshold: float | None = Field(None, ge=0, le=1)
     openai_realtime_language: str | None = None
+    openai_realtime_prompt: str | None = None
+    openai_realtime_voice: str | None = None
     publish: bool = True
 
 
@@ -130,6 +139,8 @@ def get_agent_config(
         interruption_sensitivity=agent.get("interruption_sensitivity"),
         intent_confidence_threshold=get_intent_threshold(db, settings),
         openai_realtime_language=get_openai_language(db),
+        openai_realtime_prompt=get_openai_prompt(db),
+        openai_realtime_voice=get_openai_voice(db),
     )
 
 
@@ -172,6 +183,19 @@ def patch_agent_config(
                 detail=f"openai_realtime_language phải là một trong {list(OPENAI_LANGUAGE_NAMES)}",
             )
         set_openai_language(db, body.openai_realtime_language)
+        updated_local = True
+
+    if body.openai_realtime_prompt is not None:
+        set_openai_prompt(db, body.openai_realtime_prompt)
+        updated_local = True
+
+    if body.openai_realtime_voice is not None:
+        if body.openai_realtime_voice not in OPENAI_VOICES:
+            raise HTTPException(
+                status_code=422,
+                detail=f"openai_realtime_voice phải là một trong {sorted(OPENAI_VOICES)}",
+            )
+        set_openai_voice(db, body.openai_realtime_voice)
         updated_local = True
 
     llm_id: str | None = None

@@ -14,6 +14,8 @@ export interface AgentConfigResponse {
   interruption_sensitivity: number | null;
   intent_confidence_threshold: number;
   openai_realtime_language: string;
+  openai_realtime_prompt: string;
+  openai_realtime_voice: string;
 }
 
 export interface AgentConfigUpdate {
@@ -25,6 +27,8 @@ export interface AgentConfigUpdate {
   interruption_sensitivity?: number;
   intent_confidence_threshold?: number;
   openai_realtime_language?: string;
+  openai_realtime_prompt?: string;
+  openai_realtime_voice?: string;
   publish: boolean;
 }
 

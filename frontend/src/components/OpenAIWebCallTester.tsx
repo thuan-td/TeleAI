@@ -39,6 +39,13 @@ export function OpenAIWebCallTester() {
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.addEventListener("close", () => setCallState((prev) => (prev === "error" ? prev : "ended")));
+      // OpenAI Realtime has no Retell-style auto-greeting (begin_message) —
+      // the model waits for user audio by default. Sending an empty
+      // response.create right when the data channel opens triggers an
+      // initial response from the session's `instructions` alone (confirmed
+      // via docs research 2026-09-24: response.input accepts an empty array,
+      // no preceding conversation.item.create is required).
+      dc.addEventListener("open", () => dc.send(JSON.stringify({ type: "response.create" })));
 
       pc.ontrack = (event) => {
         if (audioElRef.current) {

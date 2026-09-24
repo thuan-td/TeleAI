@@ -10,19 +10,26 @@ import {
   type VoiceOption,
 } from "../api/agentConfig";
 import { BehaviorSliders } from "../components/agent/BehaviorSliders";
+import { LanguagePicker } from "../components/agent/LanguagePicker";
+import { OpenAIRealtimeConfig } from "../components/agent/OpenAIRealtimeConfig";
 import { PromptEditor } from "../components/agent/PromptEditor";
 import { SaveResultBanner } from "../components/agent/SaveResultBanner";
 import { SystemIntentThreshold } from "../components/agent/SystemIntentThreshold";
 import { VoicePicker } from "../components/agent/VoicePicker";
 
+type ProviderTab = "retell" | "openai";
+
 interface FormState {
   general_prompt: string;
   begin_message: string;
   voice_id: string;
+  language: string;
   responsiveness: number;
   interruption_sensitivity: number;
   intent_confidence_threshold: number;
   openai_realtime_language: string;
+  openai_realtime_prompt: string;
+  openai_realtime_voice: string;
 }
 
 function toFormState(config: AgentConfigResponse): FormState {
@@ -30,15 +37,19 @@ function toFormState(config: AgentConfigResponse): FormState {
     general_prompt: config.general_prompt ?? "",
     begin_message: config.begin_message ?? "",
     voice_id: config.voice_id,
+    language: Array.isArray(config.language) ? (config.language[0] ?? "en-US") : config.language,
     responsiveness: config.responsiveness ?? 1,
     interruption_sensitivity: config.interruption_sensitivity ?? 1,
     intent_confidence_threshold: config.intent_confidence_threshold,
     openai_realtime_language: config.openai_realtime_language,
+    openai_realtime_prompt: config.openai_realtime_prompt,
+    openai_realtime_voice: config.openai_realtime_voice,
   };
 }
 
 export function AgentConfigPage() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<ProviderTab>("retell");
   const [config, setConfig] = useState<AgentConfigResponse | null>(null);
   const [voices, setVoices] = useState<VoiceOption[]>([]);
   const [form, setForm] = useState<FormState | null>(null);
@@ -93,10 +104,13 @@ export function AgentConfigPage() {
         general_prompt: form.general_prompt,
         begin_message: form.begin_message,
         voice_id: form.voice_id,
+        language: form.language,
         responsiveness: form.responsiveness,
         interruption_sensitivity: form.interruption_sensitivity,
         intent_confidence_threshold: form.intent_confidence_threshold,
         openai_realtime_language: form.openai_realtime_language,
+        openai_realtime_prompt: form.openai_realtime_prompt,
+        openai_realtime_voice: form.openai_realtime_voice,
         publish: true,
       });
       setSaveResult(result);
@@ -128,18 +142,25 @@ export function AgentConfigPage() {
     );
   }
 
+  const tabs: { key: ProviderTab; label: string }[] = [
+    { key: "retell", label: t("agentConfig.tabs.retell") },
+    { key: "openai", label: t("agentConfig.tabs.openai") },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">{t("agentConfig.title")}</h1>
-          <p className="text-sm text-slate-500">
-            {t("agentConfig.metaLine", {
-              name: config.agent_name ?? config.agent_id,
-              version: config.version,
-              publishStatus: config.is_published ? t("agentConfig.published") : t("agentConfig.notPublished"),
-            })}
-          </p>
+          {activeTab === "retell" && (
+            <p className="text-sm text-slate-500">
+              {t("agentConfig.metaLine", {
+                name: config.agent_name ?? config.agent_id,
+                version: config.version,
+                publishStatus: config.is_published ? t("agentConfig.published") : t("agentConfig.notPublished"),
+              })}
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -151,43 +172,75 @@ export function AgentConfigPage() {
         </button>
       </div>
 
-      {config.llm_id === null && (
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          {t("agentConfig.customLlmNotice")}
-        </p>
-      )}
+      <div className="flex gap-1 border-b border-slate-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            className={
+              activeTab === tab.key
+                ? "border-b-2 border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-600"
+                : "border-b-2 border-transparent px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700"
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       <SaveResultBanner saveError={saveError} saveResult={saveResult} />
 
-      <PromptEditor
-        generalPrompt={form.general_prompt}
-        beginMessage={form.begin_message}
-        disabled={config.llm_id === null}
-        onGeneralPromptChange={(v) => updateField("general_prompt", v)}
-        onBeginMessageChange={(v) => updateField("begin_message", v)}
-      />
+      {activeTab === "retell" && (
+        <>
+          {config.llm_id === null && (
+            <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+              {t("agentConfig.customLlmNotice")}
+            </p>
+          )}
 
-      <VoicePicker
-        voices={voices}
-        selectedVoiceId={form.voice_id}
-        disabled={false}
-        onSelect={(v) => updateField("voice_id", v)}
-      />
+          <PromptEditor
+            generalPrompt={form.general_prompt}
+            beginMessage={form.begin_message}
+            disabled={config.llm_id === null}
+            onGeneralPromptChange={(v) => updateField("general_prompt", v)}
+            onBeginMessageChange={(v) => updateField("begin_message", v)}
+          />
 
-      <BehaviorSliders
-        responsiveness={form.responsiveness}
-        interruptionSensitivity={form.interruption_sensitivity}
-        disabled={false}
-        onResponsivenessChange={(v) => updateField("responsiveness", v)}
-        onInterruptionSensitivityChange={(v) => updateField("interruption_sensitivity", v)}
-      />
+          <VoicePicker
+            voices={voices}
+            selectedVoiceId={form.voice_id}
+            disabled={false}
+            onSelect={(v) => updateField("voice_id", v)}
+          />
 
-      <SystemIntentThreshold
-        value={form.intent_confidence_threshold}
-        onChange={(v) => updateField("intent_confidence_threshold", v)}
-        openaiLanguage={form.openai_realtime_language}
-        onOpenaiLanguageChange={(v) => updateField("openai_realtime_language", v)}
-      />
+          <LanguagePicker language={form.language} onLanguageChange={(v) => updateField("language", v)} />
+
+          <BehaviorSliders
+            responsiveness={form.responsiveness}
+            interruptionSensitivity={form.interruption_sensitivity}
+            disabled={false}
+            onResponsivenessChange={(v) => updateField("responsiveness", v)}
+            onInterruptionSensitivityChange={(v) => updateField("interruption_sensitivity", v)}
+          />
+
+          <SystemIntentThreshold
+            value={form.intent_confidence_threshold}
+            onChange={(v) => updateField("intent_confidence_threshold", v)}
+          />
+        </>
+      )}
+
+      {activeTab === "openai" && (
+        <OpenAIRealtimeConfig
+          language={form.openai_realtime_language}
+          onLanguageChange={(v) => updateField("openai_realtime_language", v)}
+          prompt={form.openai_realtime_prompt}
+          onPromptChange={(v) => updateField("openai_realtime_prompt", v)}
+          voice={form.openai_realtime_voice}
+          onVoiceChange={(v) => updateField("openai_realtime_voice", v)}
+        />
+      )}
     </div>
   );
 }

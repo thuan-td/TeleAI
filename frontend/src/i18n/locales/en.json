@@ -180,6 +180,15 @@
       "empty": "No matching voice found.",
       "previewTitle": "Preview"
     },
+    "languagePicker": {
+      "title": "Agent language",
+      "note": "Retell's speech recognition language. Must match the voice selected above (Retell rejects incompatible pairs).",
+      "options": {
+        "vi-VN": "Vietnamese",
+        "ja-JP": "Japanese",
+        "en-US": "English (US)"
+      }
+    },
     "behaviorSliders": {
       "title": "Conversation behavior",
       "defaultNote": "Retell's default is 1 for both values.",
@@ -191,13 +200,32 @@
       "note": "Applied on the backend when deciding warm-transfer. NOT sent to Retell.",
       "thresholdLabel": "Intent-confidence threshold"
     },
+    "tabs": {
+      "retell": "Retell",
+      "openai": "OpenAI Realtime"
+    },
     "openaiRealtimeLanguage": {
-      "label": "AI spoken language (OpenAI Realtime Web Call Test)",
+      "title": "OpenAI Realtime Web Call Test",
+      "label": "AI spoken language",
       "note": "Applies to the separate OpenAI Realtime test tool (not Retell). OpenAI has no direct language option, this is enforced via prompt so accuracy isn't guaranteed.",
       "options": {
         "vi": "Vietnamese",
         "ja": "Japanese",
         "en": "English"
+      }
+    },
+    "openaiRealtimePrompt": {
+      "label": "Prompt (instructions)",
+      "note": "Instructions for the AI. The language directive below is automatically appended.",
+      "placeholder": "You are a real estate assistant for..."
+    },
+    "openaiRealtimeVoice": {
+      "label": "Voice",
+      "note": "OpenAI does not officially document gender/origin for these voices — labels below are low-confidence estimates from community reports.",
+      "genderHints": {
+        "male": "male · estimated",
+        "female": "female · estimated",
+        "unknown": "unknown"
       }
     }
   }
