@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import uuid
 
@@ -6,6 +7,7 @@ import pypdf
 import pytesseract
 from docx import Document as DocxDocument
 from fastapi import APIRouter, Depends, Header, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -15,6 +17,7 @@ from app.core.config import Settings, get_settings
 from app.db.models import KnowledgeBaseDocument
 from app.db.session import get_db
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 
 # Top-N chunks returned per query — mirrors Retell managed-KB's `top_k` default
@@ -121,9 +124,12 @@ async def _process_upload(file: UploadFile, db: Session) -> UploadResult:
         )
 
     try:
-        content = _extract_text(file.filename, raw)
-    except Exception as exc:
-        return UploadResult(filename=file.filename, success=False, error=f"Không đọc được nội dung: {exc}")
+        content = await run_in_threadpool(_extract_text, file.filename, raw)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("kb upload: failed to extract text from %s", file.filename)
+        return UploadResult(filename=file.filename, success=False, error="Không đọc được nội dung file")
 
     if not content:
         return UploadResult(filename=file.filename, success=False, error="Không trích xuất được nội dung text")
