@@ -21,6 +21,12 @@
     "en": "English",
     "ja": "日本語"
   },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggleLabel": "Theme"
+  },
   "callMonitor": {
     "title": "Call Monitor",
     "loadError": "Failed to load call list: {{message}}",

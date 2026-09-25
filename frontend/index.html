@@ -5,6 +5,23 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>frontend</title>
+    <script>
+      // Apply theme before first paint to avoid a light-mode flash when the
+      // stored/system preference is dark. Kept in sync with the resolution
+      // logic in src/theme/ThemeProvider.tsx (localStorage key + fallback).
+      (function () {
+        try {
+          var stored = window.localStorage.getItem("teleapo-ui-theme");
+          var mode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+          var isDark =
+            mode === "dark" ||
+            (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (isDark) document.documentElement.classList.add("dark");
+        } catch (e) {
+          // localStorage/matchMedia unavailable — default to light, no-op.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

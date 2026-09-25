@@ -48,16 +48,16 @@ export function VoicePicker({ voices, selectedVoiceId, disabled, onSelect }: Voi
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-6">
-      <h2 className="text-base font-semibold text-slate-900">{t("agentConfig.voicePicker.title")}</h2>
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised p-6">
+      <h2 className="text-base font-semibold text-fg">{t("agentConfig.voicePicker.title")}</h2>
       <TextInput
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={t("agentConfig.voicePicker.searchPlaceholder")}
       />
-      <ul className="flex max-h-80 flex-col gap-1 overflow-y-auto rounded-md border border-slate-200 p-1.5">
+      <ul className="flex max-h-80 flex-col gap-1 overflow-y-auto rounded-md border border-border p-1.5">
         {filteredVoices.length === 0 && (
-          <li className="px-3 py-2 text-sm text-slate-500">{t("agentConfig.voicePicker.empty")}</li>
+          <li className="px-3 py-2 text-sm text-fg-subtle">{t("agentConfig.voicePicker.empty")}</li>
         )}
         {filteredVoices.map((voice) => {
           const isSelected = voice.voice_id === selectedVoiceId;
@@ -69,8 +69,8 @@ export function VoicePicker({ voices, selectedVoiceId, disabled, onSelect }: Voi
                 onClick={() => onSelect(voice.voice_id)}
                 className={
                   isSelected
-                    ? "flex-1 rounded-md bg-indigo-600 px-3 py-2 text-left text-sm font-medium text-white disabled:cursor-not-allowed"
-                    : "flex-1 rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed"
+                    ? "flex-1 rounded-md bg-accent px-3 py-2 text-left text-sm font-medium text-accent-fg disabled:cursor-not-allowed"
+                    : "flex-1 rounded-md px-3 py-2 text-left text-sm text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed"
                 }
               >
                 {voice.voice_name}
@@ -85,7 +85,7 @@ export function VoicePicker({ voices, selectedVoiceId, disabled, onSelect }: Voi
                   type="button"
                   onClick={() => handlePreview(voice)}
                   title={t("agentConfig.voicePicker.previewTitle")}
-                  className="rounded-md border border-slate-300 px-2 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  className="rounded-md border border-border px-2 py-2 text-sm text-fg-muted hover:bg-surface-sunken"
                 >
                   {playingId === voice.voice_id ? "⏸" : "▶"}
                 </button>

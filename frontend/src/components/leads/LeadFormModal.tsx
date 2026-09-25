@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createLead, updateLead, type Lead } from "../../api/leads";
+import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
 
 interface LeadFormModalProps {
@@ -41,13 +42,13 @@ export function LeadFormModal({ lead, onClose, onSaved }: LeadFormModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-lg bg-white p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay px-4">
+      <div className="flex w-full max-w-md flex-col gap-4 rounded-lg border border-border bg-surface-raised p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-fg">
           {mode === "edit" ? t("leads.form.editTitle") : t("leads.form.createTitle")}
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-sm text-slate-700">
+          <label className="flex flex-col gap-1 text-sm text-fg-muted">
             {t("leads.form.phoneLabel")}
             <TextInput
               value={phone}
@@ -55,7 +56,7 @@ export function LeadFormModal({ lead, onClose, onSaved }: LeadFormModalProps) {
               placeholder={t("leads.form.phonePlaceholder")}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-slate-700">
+          <label className="flex flex-col gap-1 text-sm text-fg-muted">
             {t("leads.form.nameLabel")}
             <TextInput
               value={name}
@@ -63,19 +64,15 @@ export function LeadFormModal({ lead, onClose, onSaved }: LeadFormModalProps) {
               placeholder={t("leads.form.namePlaceholder")}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm text-slate-700">
+          <label className="flex flex-col gap-1 text-sm text-fg-muted">
             {t("leads.form.langLabel")}
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            >
+            <Select value={lang} onChange={(e) => setLang(e.target.value)}>
               <option value="ja">{t("leads.form.langJa")}</option>
               <option value="vi">{t("leads.form.langVi")}</option>
-            </select>
+            </Select>
           </label>
           {error && (
-            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="rounded-md border border-danger-border bg-danger-surface px-3 py-2 text-sm text-danger-fg">
               {error}
             </p>
           )}
@@ -83,14 +80,14 @@ export function LeadFormModal({ lead, onClose, onSaved }: LeadFormModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className="rounded-md border border-border px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? t("common.saving") : t("common.save")}
             </button>

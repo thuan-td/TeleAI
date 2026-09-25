@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
 
 export interface LeadFiltersValue {
@@ -29,8 +30,8 @@ export function LeadFilters({ value, onChange }: LeadFiltersProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-      <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-slate-700">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised p-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-fg-muted">
         {t("leads.filters.searchLabel")}
         <TextInput
           value={value.q}
@@ -38,33 +39,25 @@ export function LeadFilters({ value, onChange }: LeadFiltersProps) {
           placeholder={t("leads.filters.searchPlaceholder")}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("leads.filters.statusLabel")}
-        <select
-          value={value.status}
-          onChange={(e) => onChange({ ...value, status: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-        >
+        <Select value={value.status} onChange={(e) => onChange({ ...value, status: e.target.value })}>
           {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("leads.filters.langLabel")}
-        <select
-          value={value.lang}
-          onChange={(e) => onChange({ ...value, lang: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-        >
+        <Select value={value.lang} onChange={(e) => onChange({ ...value, lang: e.target.value })}>
           {langOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
     </div>
   );

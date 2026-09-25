@@ -27,17 +27,17 @@ export function CallTesterShell({
   const stateLabel = t(`callTesterShell.state.${callState}`);
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6">
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-950">
+    <div className="mx-auto flex max-w-xl flex-col gap-4 rounded-lg border border-border bg-surface-raised p-6">
+      <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-warning px-3 py-1 text-xs font-semibold uppercase tracking-wide text-fg-on-accent">
         ⚠️ {badgeLabel}
       </span>
-      <p className="text-sm text-slate-600">{description}</p>
+      <p className="text-sm text-fg-muted">{description}</p>
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onStart}
           disabled={isBusy}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("callTesterShell.startButton")}
         </button>
@@ -45,16 +45,16 @@ export function CallTesterShell({
           type="button"
           onClick={onStop}
           disabled={!isBusy}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("callTesterShell.stopButton")}
         </button>
       </div>
-      <p className="text-sm text-slate-600">
-        {t("callTesterShell.status")} <span className="font-medium text-slate-900">{stateLabel}</span>
+      <p className="text-sm text-fg-muted">
+        {t("callTesterShell.status")} <span className="font-medium text-fg">{stateLabel}</span>
       </p>
       {errorMessage && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <p className="rounded-md border border-danger-border bg-danger-surface px-4 py-2 text-sm text-danger-fg">
           {t("callTesterShell.errorPrefix")} {errorMessage}
         </p>
       )}

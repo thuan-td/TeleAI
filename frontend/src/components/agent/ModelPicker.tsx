@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Select } from "../ui/Select";
 
 interface ModelPickerProps {
   models: string[];
@@ -6,13 +7,6 @@ interface ModelPickerProps {
   variant?: "default" | "purple";
   onSelect: (model: string) => void;
 }
-
-const VARIANT_CLASSES = {
-  default:
-    "rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500",
-  purple:
-    "rounded-md border border-purple-300 bg-white px-3 py-2 text-sm text-purple-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500",
-} as const;
 
 /** Shared model dropdown for both Retell (`model` field) and OpenAI Realtime
  * (`openai_realtime_model`) — same UI, different allowed-model list per
@@ -23,21 +17,16 @@ export function ModelPicker({ models, selectedModel, variant = "default", onSele
   const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor="model-picker" className="text-sm font-medium text-slate-700">
+      <label htmlFor="model-picker" className="text-sm font-medium text-fg-muted">
         {t("agentConfig.modelPicker.label")}
       </label>
-      <select
-        id="model-picker"
-        value={selectedModel}
-        onChange={(e) => onSelect(e.target.value)}
-        className={VARIANT_CLASSES[variant]}
-      >
+      <Select id="model-picker" value={selectedModel} variant={variant} onChange={(e) => onSelect(e.target.value)}>
         {models.map((model) => (
           <option key={model} value={model}>
             {model}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

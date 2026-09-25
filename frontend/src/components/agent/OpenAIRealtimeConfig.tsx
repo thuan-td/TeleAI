@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
 import { ModelPicker } from "./ModelPicker";
 
@@ -55,14 +56,16 @@ export function OpenAIRealtimeConfig({
 }: OpenAIRealtimeConfigProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col gap-5 rounded-lg border-2 border-dashed border-purple-300 bg-purple-50 p-6">
-      <h2 className="text-base font-semibold text-purple-900">{t("agentConfig.openaiRealtimeLanguage.title")}</h2>
+    <div className="flex flex-col gap-5 rounded-lg border-2 border-dashed border-accent-experimental-border bg-accent-experimental-surface p-6">
+      <h2 className="text-base font-semibold text-accent-experimental-fg">
+        {t("agentConfig.openaiRealtimeLanguage.title")}
+      </h2>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="openai-prompt" className="text-sm font-medium text-purple-900">
+        <label htmlFor="openai-prompt" className="text-sm font-medium text-accent-experimental-fg">
           {t("agentConfig.openaiRealtimePrompt.label")}
         </label>
-        <p className="text-xs text-purple-700">{t("agentConfig.openaiRealtimePrompt.note")}</p>
+        <p className="text-xs text-accent-experimental-fg opacity-80">{t("agentConfig.openaiRealtimePrompt.note")}</p>
         <Textarea
           id="openai-prompt"
           variant="purple"
@@ -74,41 +77,38 @@ export function OpenAIRealtimeConfig({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="openai-voice" className="text-sm font-medium text-purple-900">
+        <label htmlFor="openai-voice" className="text-sm font-medium text-accent-experimental-fg">
           {t("agentConfig.openaiRealtimeVoice.label")}
         </label>
-        <p className="text-xs text-purple-700">{t("agentConfig.openaiRealtimeVoice.note")}</p>
-        <select
-          id="openai-voice"
-          value={voice}
-          onChange={(e) => onVoiceChange(e.target.value)}
-          className="rounded-md border border-purple-300 bg-white px-3 py-2 text-sm text-purple-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-        >
+        <p className="text-xs text-accent-experimental-fg opacity-80">{t("agentConfig.openaiRealtimeVoice.note")}</p>
+        <Select id="openai-voice" variant="purple" value={voice} onChange={(e) => onVoiceChange(e.target.value)}>
           {OPENAI_VOICE_OPTIONS.map(({ id, genderHint }) => (
             <option key={id} value={id}>
               {id} ({t(`agentConfig.openaiRealtimeVoice.genderHints.${genderHint}`)})
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="openai-language" className="text-sm font-medium text-purple-900">
+        <label htmlFor="openai-language" className="text-sm font-medium text-accent-experimental-fg">
           {t("agentConfig.openaiRealtimeLanguage.label")}
         </label>
-        <p className="text-xs text-purple-700">{t("agentConfig.openaiRealtimeLanguage.note")}</p>
-        <select
+        <p className="text-xs text-accent-experimental-fg opacity-80">
+          {t("agentConfig.openaiRealtimeLanguage.note")}
+        </p>
+        <Select
           id="openai-language"
+          variant="purple"
           value={language}
           onChange={(e) => onLanguageChange(e.target.value)}
-          className="rounded-md border border-purple-300 bg-white px-3 py-2 text-sm text-purple-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
         >
           {OPENAI_LANGUAGE_OPTIONS.map((lang) => (
             <option key={lang} value={lang}>
               {t(`agentConfig.openaiRealtimeLanguage.options.${lang}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <ModelPicker models={OPENAI_REALTIME_MODELS} selectedModel={model} variant="purple" onSelect={onModelChange} />

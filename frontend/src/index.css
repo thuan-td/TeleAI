@@ -1,5 +1,164 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (Tailwind v4 CSS-first config). `.dark` is toggled on
+ * <html> by ThemeProvider — enables manual light/dark/system switching
+ * instead of relying on `prefers-color-scheme` media strategy alone. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------
+ * Design tokens — see docs/design-guidelines.md for full rationale and
+ * usage rules. Semantic tokens (surface/text/border/accent/status) are
+ * CSS variables so components never hardcode raw Tailwind color scales;
+ * :root = light values, .dark = dark values. Tokens are exposed to
+ * Tailwind utilities via @theme inline so `bg-surface`, `text-fg`, etc.
+ * are usable as first-class utility classes.
+ * ------------------------------------------------------------------- */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-on-accent: var(--fg-on-accent);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+  --color-danger-surface: var(--danger-surface);
+  --color-danger-border: var(--danger-border);
+
+  --color-warning: var(--warning);
+  --color-warning-fg: var(--warning-fg);
+  --color-warning-surface: var(--warning-surface);
+  --color-warning-border: var(--warning-border);
+
+  --color-success: var(--success);
+  --color-success-fg: var(--success-fg);
+  --color-success-surface: var(--success-surface);
+  --color-success-border: var(--success-border);
+
+  --color-info: var(--info);
+  --color-info-fg: var(--info-fg);
+  --color-info-surface: var(--info-surface);
+  --color-info-border: var(--info-border);
+
+  --color-accent-experimental: var(--accent-experimental);
+  --color-accent-experimental-fg: var(--accent-experimental-fg);
+  --color-accent-experimental-surface: var(--accent-experimental-surface);
+  --color-accent-experimental-border: var(--accent-experimental-border);
+}
+
+:root {
+  --surface: #f8fafc; /* app background */
+  --surface-raised: #ffffff; /* cards, header, table */
+  --surface-sunken: #f1f5f9; /* table head, code blocks, inputs disabled */
+  --surface-overlay: rgb(15 23 42 / 0.4); /* modal backdrop */
+
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --fg-subtle: #5b6472; /* custom, darker than slate-500 — 4.5:1 min against surface-sunken (worst case), verified */
+  --fg-on-accent: #ffffff;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-fg: #ffffff;
+
+  --danger: #dc2626;
+  --danger-fg: #b91c1c;
+  --danger-surface: #fef2f2;
+  --danger-border: #fecaca;
+
+  --warning: #d97706;
+  --warning-fg: #92400e;
+  --warning-surface: #fffbeb;
+  --warning-border: #fde68a;
+
+  --success: #059669;
+  --success-fg: #047857;
+  --success-surface: #ecfdf5;
+  --success-border: #a7f3d0;
+
+  --info: #4f46e5;
+  --info-fg: #4338ca;
+  --info-surface: #eef2ff;
+  --info-border: #c7d2fe;
+
+  --accent-experimental: #9333ea;
+  --accent-experimental-fg: #6b21a8;
+  --accent-experimental-surface: #faf5ff;
+  --accent-experimental-border: #e9d5ff;
+
+  color-scheme: light;
+}
+
+.dark {
+  --surface: #0b1120;
+  --surface-raised: #151e30;
+  --surface-sunken: #0f172a;
+  --surface-overlay: rgb(2 6 23 / 0.6);
+
+  --fg: #f1f5f9;
+  --fg-muted: #94a3b8;
+  --fg-subtle: #7c8aa0; /* custom, lighter than slate-500 — 4.5:1 min against surface-raised (worst case), verified */
+  --fg-on-accent: #ffffff;
+
+  --border: #263449;
+  --border-strong: #334155;
+
+  --accent: #4f46e5; /* darker than indigo-500 — 6.3:1 white-on-accent, AA-normal */
+  --accent-hover: #6366f1;
+  --accent-fg: #ffffff;
+
+  --danger: #f87171;
+  --danger-fg: #fca5a5;
+  --danger-surface: rgb(127 29 29 / 0.25);
+  --danger-border: rgb(248 113 113 / 0.35);
+
+  --warning: #fbbf24;
+  --warning-fg: #fcd34d;
+  --warning-surface: rgb(120 53 15 / 0.25);
+  --warning-border: rgb(251 191 36 / 0.35);
+
+  --success: #34d399;
+  --success-fg: #6ee7b7;
+  --success-surface: rgb(6 78 59 / 0.25);
+  --success-border: rgb(52 211 153 / 0.35);
+
+  --info: #818cf8;
+  --info-fg: #a5b4fc;
+  --info-surface: rgb(49 46 129 / 0.3);
+  --info-border: rgb(129 140 248 / 0.35);
+
+  --accent-experimental: #c084fc;
+  --accent-experimental-fg: #d8b4fe;
+  --accent-experimental-surface: rgb(88 28 135 / 0.25);
+  --accent-experimental-border: rgb(192 132 252 / 0.35);
+
+  color-scheme: dark;
+}
+
 body {
   margin: 0;
+  background-color: var(--surface);
+  color: var(--fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

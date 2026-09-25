@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchLeads, type Lead } from "../../api/leads";
+import { Select } from "../ui/Select";
 import { TextInput } from "../ui/TextInput";
 
 export interface CallFiltersValue {
@@ -34,8 +35,8 @@ export function CallFilters({ value, onChange }: CallFiltersProps) {
   ];
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-      <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-slate-700">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised p-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <label className="flex flex-1 min-w-50 flex-col gap-1 text-sm text-fg-muted">
         {t("calls.filters.searchLabel")}
         <TextInput
           value={value.q}
@@ -43,36 +44,28 @@ export function CallFilters({ value, onChange }: CallFiltersProps) {
           placeholder={t("calls.filters.searchPlaceholder")}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("calls.filters.statusLabel")}
-        <select
-          value={value.status}
-          onChange={(e) => onChange({ ...value, status: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-        >
+        <Select value={value.status} onChange={(e) => onChange({ ...value, status: e.target.value })}>
           {statusOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("calls.filters.leadLabel")}
-        <select
-          value={value.leadId}
-          onChange={(e) => onChange({ ...value, leadId: e.target.value })}
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-        >
+        <Select value={value.leadId} onChange={(e) => onChange({ ...value, leadId: e.target.value })}>
           <option value="">{t("calls.filters.leadAll")}</option>
           {leads.map((lead) => (
             <option key={lead.id} value={lead.id}>
               {lead.name} ({lead.phone})
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("calls.filters.dateFromLabel")}
         <TextInput
           type="date"
@@ -80,7 +73,7 @@ export function CallFilters({ value, onChange }: CallFiltersProps) {
           onChange={(e) => onChange({ ...value, dateFrom: e.target.value })}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm text-slate-700">
+      <label className="flex flex-col gap-1 text-sm text-fg-muted">
         {t("calls.filters.dateToLabel")}
         <TextInput
           type="date"

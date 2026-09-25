@@ -21,6 +21,12 @@
     "en": "English",
     "ja": "日本語"
   },
+  "theme": {
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống",
+    "toggleLabel": "Giao diện"
+  },
   "callMonitor": {
     "title": "Call Monitor",
     "loadError": "Lỗi tải danh sách cuộc gọi: {{message}}",

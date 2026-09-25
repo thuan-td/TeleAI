@@ -11,13 +11,13 @@ export function SaveResultBanner({ saveError, saveResult }: SaveResultBannerProp
   return (
     <>
       {saveError && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <p className="rounded-md border border-danger-border bg-danger-surface px-4 py-2 text-sm text-danger-fg">
           {t("agentConfig.saveResult.saveErrorPrefix")} {saveError}
         </p>
       )}
 
       {saveResult && !saveResult.published && (
-        <p className="rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+        <p className="rounded-md border border-warning-border bg-warning-surface px-4 py-2 text-sm text-warning-fg">
           {t("agentConfig.saveResult.savedNotPublished", {
             reason: saveResult.publish_error ?? t("agentConfig.saveResult.publishFailedFallback"),
           })}
@@ -25,7 +25,7 @@ export function SaveResultBanner({ saveError, saveResult }: SaveResultBannerProp
       )}
 
       {saveResult && saveResult.published && (
-        <p className="rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+        <p className="rounded-md border border-success-border bg-success-surface px-4 py-2 text-sm text-success-fg">
           {t("agentConfig.saveResult.savedAndPublished")}
         </p>
       )}

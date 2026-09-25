@@ -15,7 +15,7 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
   const hasNext = to < total;
 
   return (
-    <div className="flex items-center justify-between gap-3 text-sm text-slate-600">
+    <div className="flex items-center justify-between gap-3 text-sm text-fg-muted">
       <span>
         {from}–{to} / {total}
       </span>
@@ -24,7 +24,7 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={!hasPrev}
-          className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-1.5 font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("pagination.prev")}
         </button>
@@ -32,7 +32,7 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={!hasNext}
-          className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-border px-3 py-1.5 font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50"
         >
           {t("pagination.next")}
         </button>

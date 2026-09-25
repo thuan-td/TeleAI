@@ -56,11 +56,11 @@ export function LeadsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">{t("leads.title")}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-fg">{t("leads.title")}</h1>
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg shadow-sm hover:bg-accent-hover"
         >
           {t("leads.createButton")}
         </button>
@@ -69,7 +69,7 @@ export function LeadsPage() {
       <LeadFilters value={filters} onChange={setFilters} />
 
       {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <p className="rounded-md border border-danger-border bg-danger-surface px-4 py-2 text-sm text-danger-fg">
           {t("leads.loadError", { message: error })}
         </p>
       )}

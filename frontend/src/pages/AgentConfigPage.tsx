@@ -154,12 +154,12 @@ export function AgentConfigPage() {
   }
 
   if (isLoading) {
-    return <p className="text-sm text-slate-500">{t("agentConfig.loading")}</p>;
+    return <p className="text-sm text-fg-subtle">{t("agentConfig.loading")}</p>;
   }
 
   if (unavailableMessage) {
     return (
-      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      <div className="rounded-md border border-warning-border bg-warning-surface px-4 py-3 text-sm text-warning-fg">
         {unavailableMessage}
       </div>
     );
@@ -167,7 +167,7 @@ export function AgentConfigPage() {
 
   if (loadError || !config || !form) {
     return (
-      <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+      <p className="rounded-md border border-danger-border bg-danger-surface px-4 py-2 text-sm text-danger-fg">
         {t("agentConfig.loadError", { message: loadError ?? t("common.unknownError") })}
       </p>
     );
@@ -182,9 +182,9 @@ export function AgentConfigPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{t("agentConfig.title")}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">{t("agentConfig.title")}</h1>
           {activeTab === "retell" && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-fg-subtle">
               {t("agentConfig.metaLine", {
                 name: config.agent_name ?? config.agent_id,
                 version: config.version,
@@ -197,13 +197,13 @@ export function AgentConfigPage() {
           type="button"
           onClick={handleSave}
           disabled={!isDirty || isSaving}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-fg shadow-sm hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? t("agentConfig.saving") : t("agentConfig.saveButton")}
         </button>
       </div>
 
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -211,8 +211,8 @@ export function AgentConfigPage() {
             onClick={() => setActiveTab(tab.key)}
             className={
               activeTab === tab.key
-                ? "border-b-2 border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-600"
-                : "border-b-2 border-transparent px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700"
+                ? "border-b-2 border-accent px-4 py-2 text-sm font-medium text-accent"
+                : "border-b-2 border-transparent px-4 py-2 text-sm font-medium text-fg-subtle hover:text-fg"
             }
           >
             {tab.label}
@@ -225,7 +225,7 @@ export function AgentConfigPage() {
       {activeTab === "retell" && (
         <>
           {config.llm_id === null && (
-            <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+            <p className="rounded-md border border-warning-border bg-warning-surface px-4 py-2 text-sm text-warning-fg">
               {t("agentConfig.customLlmNotice")}
             </p>
           )}

@@ -19,15 +19,15 @@ export function PromptEditor({
 }: PromptEditorProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6">
-      <h2 className="text-base font-semibold text-slate-900">{t("agentConfig.promptEditor.title")}</h2>
+    <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface-raised p-6">
+      <h2 className="text-base font-semibold text-fg">{t("agentConfig.promptEditor.title")}</h2>
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label htmlFor="begin-message" className="text-sm font-medium text-slate-700">
+          <label htmlFor="begin-message" className="text-sm font-medium text-fg-muted">
             {t("agentConfig.promptEditor.beginMessageLabel")}
           </label>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-fg-subtle">
             {t("agentConfig.promptEditor.charCount", { count: beginMessage.length })}
           </span>
         </div>
@@ -42,10 +42,10 @@ export function PromptEditor({
 
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <label htmlFor="general-prompt" className="text-sm font-medium text-slate-700">
+          <label htmlFor="general-prompt" className="text-sm font-medium text-fg-muted">
             {t("agentConfig.promptEditor.generalPromptLabel")}
           </label>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-fg-subtle">
             {t("agentConfig.promptEditor.charCount", { count: generalPrompt.length })}
           </span>
         </div>

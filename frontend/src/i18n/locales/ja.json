@@ -21,6 +21,12 @@
     "en": "English",
     "ja": "日本語"
   },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "toggleLabel": "テーマ"
+  },
   "callMonitor": {
     "title": "コールモニター",
     "loadError": "通話一覧の取得に失敗しました: {{message}}",

@@ -1,8 +1,10 @@
 import { forwardRef, type TextareaHTMLAttributes } from "react";
 
 const VARIANT_CLASSES = {
-  default: "border-slate-300 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-slate-100",
-  purple: "border-purple-300 bg-white text-purple-900 focus:border-purple-500 focus:ring-purple-500",
+  default:
+    "border-border bg-surface-raised text-fg placeholder:text-fg-subtle focus:border-accent focus:ring-accent disabled:bg-surface-sunken disabled:text-fg-subtle",
+  purple:
+    "border-accent-experimental-border bg-surface-raised text-accent-experimental-fg placeholder:text-fg-subtle focus:border-accent-experimental focus:ring-accent-experimental",
 } as const;
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -17,7 +19,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   return (
     <textarea
       ref={ref}
-      className={`rounded-md border px-3 py-2 text-sm outline-none focus:ring-1 disabled:cursor-not-allowed ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`rounded-md border px-3 py-2 text-sm outline-none transition-colors focus:ring-1 disabled:cursor-not-allowed ${VARIANT_CLASSES[variant]} ${className}`}
       {...props}
     />
   );

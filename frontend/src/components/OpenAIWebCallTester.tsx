@@ -154,7 +154,7 @@ export function OpenAIWebCallTester() {
       description={
         <>
           {t("openaiWebCallTester.descriptionPrefix")}{" "}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">gpt-realtime</code>{" "}
+          <code className="rounded bg-surface-sunken px-1.5 py-0.5 text-xs">gpt-realtime</code>{" "}
           {t("openaiWebCallTester.descriptionSuffix")}
         </>
       }
