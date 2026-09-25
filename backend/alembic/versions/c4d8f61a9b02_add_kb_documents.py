@@ -9,7 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 
 
 revision: str = 'c4d8f61a9b02'
@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("content", sa.Text, nullable=False),
         sa.Column(
             "tokens",
-            sa.dialects.postgresql.TSVECTOR,
+            TSVECTOR,
             sa.Computed(
                 "setweight(to_tsvector('simple', title), 'A') || "
                 "setweight(to_tsvector('simple', content), 'B')",
