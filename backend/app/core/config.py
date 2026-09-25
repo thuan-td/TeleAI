@@ -1,6 +1,7 @@
 import uuid
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Fixed default org until multi-tenant auth is added (YAGNI — internal tool, no billing).
@@ -31,6 +32,12 @@ class Settings(BaseSettings):
     allowed_phone_numbers: str = ""
     intent_confidence_threshold: float = 0.7
     max_call_retries: int = 2
+    # Signs the session cookie (itsdangerous) — treat like retell_webhook_secret,
+    # never commit. Generate with: openssl rand -hex 32
+    session_secret: str = Field(min_length=32)
+    # False in dev (plain HTTP on localhost); set true in prod (HTTPS only).
+    cookie_secure: bool = False
+    session_max_age_seconds: int = 28800
 
     def allowed_numbers(self) -> set[str]:
         return {n.strip() for n in self.allowed_phone_numbers.split(",") if n.strip()}

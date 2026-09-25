@@ -58,6 +58,7 @@ def test_settings() -> Settings:
         database_url=TEST_DATABASE_URL,
         retell_webhook_secret="test-webhook-secret",
         kb_webhook_secret="test-kb-webhook-secret",
+        session_secret="test-session-secret-at-least-32-characters-long",
         allowed_phone_numbers="+84900000001",
         intent_confidence_threshold=0.7,
         max_call_retries=2,
