@@ -27,6 +27,16 @@
     "system": "System",
     "toggleLabel": "Theme"
   },
+  "auth": {
+    "loginTitle": "Login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in…",
+    "error": "Wrong username or password",
+    "logout": "Log out",
+    "forbidden": "You don't have permission to access this page."
+  },
   "callMonitor": {
     "title": "Call Monitor",
     "loadError": "Failed to load call list: {{message}}",

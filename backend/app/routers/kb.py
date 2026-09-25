@@ -1,3 +1,4 @@
+import hmac
 import io
 import logging
 import os
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth import require_admin
 from app.core.config import Settings, get_settings
 from app.db.models import KnowledgeBaseDocument
 from app.db.session import get_db
@@ -58,7 +60,7 @@ class KnowledgeBaseQueryResponse(BaseModel):
     results: list[KnowledgeBaseQueryResult]
 
 
-@router.get("/documents", response_model=list[KnowledgeBaseDocumentResponse])
+@router.get("/documents", response_model=list[KnowledgeBaseDocumentResponse], dependencies=[Depends(require_admin)])
 def list_documents(db: Session = Depends(get_db)) -> list[KnowledgeBaseDocumentResponse]:
     documents = db.execute(
         select(KnowledgeBaseDocument).order_by(KnowledgeBaseDocument.created_at.desc())
@@ -68,7 +70,9 @@ def list_documents(db: Session = Depends(get_db)) -> list[KnowledgeBaseDocumentR
     ]
 
 
-@router.post("/documents", response_model=KnowledgeBaseDocumentResponse, status_code=201)
+@router.post(
+    "/documents", response_model=KnowledgeBaseDocumentResponse, status_code=201, dependencies=[Depends(require_admin)]
+)
 def create_document(
     body: KnowledgeBaseDocumentCreate, db: Session = Depends(get_db)
 ) -> KnowledgeBaseDocumentResponse:
@@ -146,7 +150,12 @@ async def _process_upload(file: UploadFile, db: Session) -> UploadResult:
     )
 
 
-@router.post("/documents/upload", response_model=UploadDocumentsResponse, status_code=201)
+@router.post(
+    "/documents/upload",
+    response_model=UploadDocumentsResponse,
+    status_code=201,
+    dependencies=[Depends(require_admin)],
+)
 async def upload_documents(
     files: list[UploadFile], db: Session = Depends(get_db)
 ) -> UploadDocumentsResponse:
@@ -157,7 +166,7 @@ async def upload_documents(
     return UploadDocumentsResponse(results=results)
 
 
-@router.delete("/documents/{document_id}", status_code=204)
+@router.delete("/documents/{document_id}", status_code=204, dependencies=[Depends(require_admin)])
 def delete_document(document_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
     document = db.get(KnowledgeBaseDocument, document_id)
     if document is None:
@@ -178,7 +187,7 @@ def _search(db: Session, query_text: str) -> list[KnowledgeBaseQueryResult]:
     return [KnowledgeBaseQueryResult(title=row.title, content=row.content) for row in rows]
 
 
-@router.post("/query", response_model=KnowledgeBaseQueryResponse)
+@router.post("/query", response_model=KnowledgeBaseQueryResponse, dependencies=[Depends(require_admin)])
 def query_documents(
     body: KnowledgeBaseQueryRequest, db: Session = Depends(get_db)
 ) -> KnowledgeBaseQueryResponse:
@@ -201,6 +210,12 @@ class RetellFunctionCallRequest(BaseModel):
     args: dict
 
 
+# INTENTIONALLY NO require_admin HERE (unlike every other route in this file):
+# Retell calls this from the public internet with no session cookie — it
+# authenticates via X-KB-Webhook-Secret instead (checked in the body below).
+# Adding cookie-auth here would break the live KB lookup mid-call. See
+# phase-02-router-protection.md Key Insight #3 before "fixing" this for
+# consistency.
 @router.post("/retell-function-call", response_model=KnowledgeBaseQueryResponse)
 def retell_query_knowledge_base(
     body: RetellFunctionCallRequest,
@@ -215,7 +230,7 @@ def retell_query_knowledge_base(
     # (see _knowledge_base_tool() in agent_config.py) and echoed back here on
     # every call; without this check anyone who learns the URL could read the
     # entire knowledge base (code review finding, 2026-09-24).
-    if x_kb_webhook_secret != settings.kb_webhook_secret:
+    if x_kb_webhook_secret is None or not hmac.compare_digest(x_kb_webhook_secret, settings.kb_webhook_secret):
         raise HTTPException(status_code=401, detail="invalid webhook secret")
 
     query_text = body.args.get("query", "")

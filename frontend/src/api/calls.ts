@@ -44,7 +44,7 @@ export interface FetchCallsParams {
   q?: string;
 }
 
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+import { API_BASE, apiFetch, parseErrorDetail } from "./client";
 
 function buildCallsSearchParams(params: FetchCallsParams): URLSearchParams {
   const search = new URLSearchParams();
@@ -61,17 +61,17 @@ export async function fetchCalls(params: FetchCallsParams = {}): Promise<Paginat
   search.set("page", String(params.page ?? 1));
   search.set("page_size", String(params.pageSize ?? 20));
 
-  const response = await fetch(`${API_BASE}/calls?${search.toString()}`);
+  const response = await apiFetch(`/calls?${search.toString()}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch calls: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to fetch calls: ${response.status}`));
   }
   return response.json();
 }
 
 export async function fetchCallDetail(callId: string): Promise<CallDetail> {
-  const response = await fetch(`${API_BASE}/calls/${encodeURIComponent(callId)}`);
+  const response = await apiFetch(`/calls/${encodeURIComponent(callId)}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch call detail: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to fetch call detail: ${response.status}`));
   }
   return response.json();
 }
@@ -82,10 +82,9 @@ export function buildExportUrl(params: FetchCallsParams = {}): string {
 }
 
 export async function startWebCall(): Promise<{ access_token: string }> {
-  const response = await fetch(`${API_BASE}/calls/web`, { method: "POST" });
+  const response = await apiFetch("/calls/web", { method: "POST" });
   if (!response.ok) {
-    const detail = await response.json().catch(() => null);
-    throw new Error(detail?.detail ?? `Failed to start web call: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to start web call: ${response.status}`));
   }
   return response.json();
 }
@@ -97,23 +96,21 @@ export interface OpenAIWebCallSecret {
 }
 
 export async function startOpenAIWebCall(): Promise<OpenAIWebCallSecret> {
-  const response = await fetch(`${API_BASE}/calls/web/openai`, { method: "POST" });
+  const response = await apiFetch("/calls/web/openai", { method: "POST" });
   if (!response.ok) {
-    const detail = await response.json().catch(() => null);
-    throw new Error(detail?.detail ?? `Failed to start OpenAI web call: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to start OpenAI web call: ${response.status}`));
   }
   return response.json();
 }
 
 export async function dialCall(leadId: string): Promise<CallSummary> {
-  const response = await fetch(`${API_BASE}/calls`, {
+  const response = await apiFetch("/calls", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ lead_id: leadId }),
   });
   if (!response.ok) {
-    const detail = await response.json().catch(() => null);
-    throw new Error(detail?.detail ?? `Failed to dial call: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to dial call: ${response.status}`));
   }
   return response.json();
 }

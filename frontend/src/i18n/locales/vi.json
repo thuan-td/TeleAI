@@ -27,6 +27,16 @@
     "system": "Hệ thống",
     "toggleLabel": "Giao diện"
   },
+  "auth": {
+    "loginTitle": "Đăng nhập",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "submit": "Đăng nhập",
+    "submitting": "Đang đăng nhập…",
+    "error": "Sai tên đăng nhập hoặc mật khẩu",
+    "logout": "Đăng xuất",
+    "forbidden": "Bạn không có quyền truy cập trang này."
+  },
   "callMonitor": {
     "title": "Call Monitor",
     "loadError": "Lỗi tải danh sách cuộc gọi: {{message}}",

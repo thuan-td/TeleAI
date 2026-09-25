@@ -40,7 +40,8 @@ def get_current_user(
     return CurrentUser(id=user.id, username=user.username, role=user.role)
 
 
-require_user = Depends(get_current_user)
+def require_user(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    return user
 
 
 def require_admin(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:

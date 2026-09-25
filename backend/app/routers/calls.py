@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.auth import require_admin
 from app.adapters.voice_provider import VoiceProvider
 from app.core.config import Settings, get_settings
 from app.db.models import CallRecord, Lead, WebhookEvent
@@ -102,7 +103,7 @@ def list_calls(
     return PaginatedCalls(items=items, total=total or 0, page=page, page_size=page_size)
 
 
-@router.get("/export")
+@router.get("/export", dependencies=[Depends(require_admin)])
 def export_calls(
     status: str | None = None,
     lead_id: uuid.UUID | None = None,

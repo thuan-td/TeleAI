@@ -10,12 +10,17 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.adapters.mock_provider import MockVoiceProvider
 from app.core.config import Settings, get_settings
-from app.db.models import Base, Lead
+from app.core.security import SESSION_COOKIE_NAME, get_serializer, hash_password
+from app.db.models import Base, Lead, User
 from app.db.session import get_db
 from app.dependencies import get_voice_provider
 from app.main import app
 
 TEST_DATABASE_URL = "postgresql+psycopg://teleapo:teleapo@localhost:5432/teleapo_test"
+
+# Computed once per test session — bcrypt is slow, and every test-user login
+# uses the same fixed password, so re-hashing it per test would be pure waste.
+_TEST_PASSWORD_HASH = hash_password("test-password")
 
 
 @pytest.fixture(scope="session")
@@ -66,11 +71,53 @@ def test_settings() -> Settings:
 
 
 @pytest.fixture
-def client(db_session, mock_provider, test_settings) -> TestClient:
+def admin_user(db_session) -> User:
+    user = User(username="test-admin", password_hash=_TEST_PASSWORD_HASH, role="admin")
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def viewer_user(db_session) -> User:
+    user = User(username="test-viewer", password_hash=_TEST_PASSWORD_HASH, role="viewer")
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+def _client_for(user: User | None, db_session, mock_provider, test_settings) -> TestClient:
     app.dependency_overrides[get_db] = lambda: db_session
     app.dependency_overrides[get_voice_provider] = lambda: mock_provider
     app.dependency_overrides[get_settings] = lambda: test_settings
-    yield TestClient(app)
+    test_client = TestClient(app)
+    if user is not None:
+        token = get_serializer(test_settings).dumps({"uid": str(user.id)})
+        test_client.cookies.set(SESSION_COOKIE_NAME, token)
+    return test_client
+
+
+@pytest.fixture
+def client(admin_user, db_session, mock_provider, test_settings) -> TestClient:
+    """Logged in as admin by default — most existing tests exercise
+    admin-only endpoints (agent_config, kb, web_calls), so this is the
+    fixture that needs the fewest call-site changes (phase-03 plan §Q4)."""
+    test_client = _client_for(admin_user, db_session, mock_provider, test_settings)
+    yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def viewer_client(viewer_user, db_session, mock_provider, test_settings) -> TestClient:
+    test_client = _client_for(viewer_user, db_session, mock_provider, test_settings)
+    yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def anon_client(db_session, mock_provider, test_settings) -> TestClient:
+    test_client = _client_for(None, db_session, mock_provider, test_settings)
+    yield test_client
     app.dependency_overrides.clear()
 
 

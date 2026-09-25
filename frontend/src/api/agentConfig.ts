@@ -1,4 +1,4 @@
-import { API_BASE } from "./calls";
+import { apiFetch, parseErrorDetail } from "./client";
 
 export interface AgentConfigResponse {
   agent_id: string;
@@ -57,13 +57,8 @@ export interface VoiceOption {
 
 export class AgentConfigUnavailableError extends Error {}
 
-async function parseErrorDetail(response: Response, fallback: string): Promise<string> {
-  const detail = await response.json().catch(() => null);
-  return detail?.detail ?? fallback;
-}
-
 export async function fetchAgentConfig(): Promise<AgentConfigResponse> {
-  const response = await fetch(`${API_BASE}/agent/config`);
+  const response = await apiFetch("/agent/config");
   if (response.status === 503) {
     throw new AgentConfigUnavailableError(
       await parseErrorDetail(response, "Chưa cấu hình Retell API key trên server."),
@@ -76,7 +71,7 @@ export async function fetchAgentConfig(): Promise<AgentConfigResponse> {
 }
 
 export async function updateAgentConfig(patch: AgentConfigUpdate): Promise<AgentConfigSaveResult> {
-  const response = await fetch(`${API_BASE}/agent/config`, {
+  const response = await apiFetch("/agent/config", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
@@ -88,7 +83,7 @@ export async function updateAgentConfig(patch: AgentConfigUpdate): Promise<Agent
 }
 
 export async function fetchVoices(): Promise<VoiceOption[]> {
-  const response = await fetch(`${API_BASE}/agent/voices`);
+  const response = await apiFetch("/agent/voices");
   if (response.status === 503) {
     throw new AgentConfigUnavailableError(
       await parseErrorDetail(response, "Chưa cấu hình Retell API key trên server."),

@@ -27,6 +27,16 @@
     "system": "システム",
     "toggleLabel": "テーマ"
   },
+  "auth": {
+    "loginTitle": "ログイン",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "submitting": "ログイン中…",
+    "error": "ユーザー名またはパスワードが間違っています",
+    "logout": "ログアウト",
+    "forbidden": "このページへのアクセス権限がありません。"
+  },
   "callMonitor": {
     "title": "コールモニター",
     "loadError": "通話一覧の取得に失敗しました: {{message}}",

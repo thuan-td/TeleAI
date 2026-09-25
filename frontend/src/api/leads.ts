@@ -1,4 +1,4 @@
-import { API_BASE } from "./calls";
+import { apiFetch, parseErrorDetail } from "./client";
 
 export interface Lead {
   id: string;
@@ -43,11 +43,6 @@ export interface FetchLeadsParams {
   lang?: string;
 }
 
-async function parseErrorOrThrow(response: Response, fallback: string): Promise<never> {
-  const detail = await response.json().catch(() => null);
-  throw new Error(detail?.detail ?? fallback);
-}
-
 export async function fetchLeads(params: FetchLeadsParams = {}): Promise<PaginatedLeads> {
   const search = new URLSearchParams();
   search.set("page", String(params.page ?? 1));
@@ -56,48 +51,48 @@ export async function fetchLeads(params: FetchLeadsParams = {}): Promise<Paginat
   if (params.status) search.set("status", params.status);
   if (params.lang) search.set("lang", params.lang);
 
-  const response = await fetch(`${API_BASE}/leads?${search.toString()}`);
+  const response = await apiFetch(`/leads?${search.toString()}`);
   if (!response.ok) {
-    await parseErrorOrThrow(response, `Failed to fetch leads: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to fetch leads: ${response.status}`));
   }
   return response.json();
 }
 
 export async function fetchLead(id: string): Promise<LeadDetail> {
-  const response = await fetch(`${API_BASE}/leads/${id}`);
+  const response = await apiFetch(`/leads/${id}`);
   if (!response.ok) {
-    await parseErrorOrThrow(response, `Failed to fetch lead: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to fetch lead: ${response.status}`));
   }
   return response.json();
 }
 
 export async function createLead(input: CreateLeadInput): Promise<Lead> {
-  const response = await fetch(`${API_BASE}/leads`, {
+  const response = await apiFetch("/leads", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
   if (!response.ok) {
-    await parseErrorOrThrow(response, `Failed to create lead: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to create lead: ${response.status}`));
   }
   return response.json();
 }
 
 export async function updateLead(id: string, patch: UpdateLeadInput): Promise<Lead> {
-  const response = await fetch(`${API_BASE}/leads/${id}`, {
+  const response = await apiFetch(`/leads/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
   });
   if (!response.ok) {
-    await parseErrorOrThrow(response, `Failed to update lead: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to update lead: ${response.status}`));
   }
   return response.json();
 }
 
 export async function deleteLead(id: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/leads/${id}`, { method: "DELETE" });
+  const response = await apiFetch(`/leads/${id}`, { method: "DELETE" });
   if (!response.ok && response.status !== 204) {
-    await parseErrorOrThrow(response, `Failed to delete lead: ${response.status}`);
+    throw new Error(await parseErrorDetail(response, `Failed to delete lead: ${response.status}`));
   }
 }

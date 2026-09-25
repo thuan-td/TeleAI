@@ -1,4 +1,4 @@
-import { API_BASE } from "./calls";
+import { apiFetch, parseErrorDetail } from "./client";
 
 export interface KnowledgeBaseDocument {
   id: string;
@@ -23,13 +23,8 @@ export interface UploadResult {
   error: string | null;
 }
 
-async function parseErrorDetail(response: Response, fallback: string): Promise<string> {
-  const detail = await response.json().catch(() => null);
-  return detail?.detail ?? fallback;
-}
-
 export async function fetchKnowledgeBaseDocuments(): Promise<KnowledgeBaseDocument[]> {
-  const response = await fetch(`${API_BASE}/kb/documents`);
+  const response = await apiFetch("/kb/documents");
   if (!response.ok) {
     throw new Error(await parseErrorDetail(response, `Failed to fetch documents: ${response.status}`));
   }
@@ -39,7 +34,7 @@ export async function fetchKnowledgeBaseDocuments(): Promise<KnowledgeBaseDocume
 export async function createKnowledgeBaseDocument(
   body: KnowledgeBaseDocumentCreate,
 ): Promise<KnowledgeBaseDocument> {
-  const response = await fetch(`${API_BASE}/kb/documents`, {
+  const response = await apiFetch("/kb/documents", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -51,7 +46,7 @@ export async function createKnowledgeBaseDocument(
 }
 
 export async function deleteKnowledgeBaseDocument(documentId: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/kb/documents/${documentId}`, { method: "DELETE" });
+  const response = await apiFetch(`/kb/documents/${documentId}`, { method: "DELETE" });
   if (!response.ok) {
     throw new Error(await parseErrorDetail(response, `Failed to delete document: ${response.status}`));
   }
@@ -62,7 +57,7 @@ export async function uploadKnowledgeBaseFiles(files: File[]): Promise<UploadRes
   for (const file of files) {
     formData.append("files", file);
   }
-  const response = await fetch(`${API_BASE}/kb/documents/upload`, {
+  const response = await apiFetch("/kb/documents/upload", {
     method: "POST",
     body: formData,
   });
@@ -74,7 +69,7 @@ export async function uploadKnowledgeBaseFiles(files: File[]): Promise<UploadRes
 }
 
 export async function queryKnowledgeBase(query: string): Promise<KnowledgeBaseQueryResult[]> {
-  const response = await fetch(`${API_BASE}/kb/query`, {
+  const response = await apiFetch("/kb/query", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query }),
