@@ -1,4 +1,10 @@
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+// Derived from the browser's current hostname rather than a fixed build-time
+// value: the same build must work whether opened via localhost or a LAN IP
+// (e.g. http://192.168.1.20:5173) — hardcoding one origin here would make
+// requests cross-site for the other, and cookies (SameSite=Lax) get dropped
+// on cross-site fetch() calls (only same-site or top-level navigation keeps
+// them). VITE_API_BASE_URL is kept as an override for non-standard setups.
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? `http://${window.location.hostname}:8008`;
 
 export class ApiError extends Error {
   status: number;
