@@ -17,6 +17,7 @@
     "agentConfig": "Cấu hình Agent"
   },
   "language": {
+    "toggleLabel": "Ngôn ngữ",
     "vi": "Tiếng Việt",
     "en": "English",
     "ja": "日本語"

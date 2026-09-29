@@ -1,8 +1,15 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { logout, type CurrentUser } from "../api/client";
 import { setStoredLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from "../i18n";
-import { ThemeToggle } from "../theme/ThemeToggle";
+import { useTheme, type ThemeMode } from "../theme/ThemeProvider";
+import { Select } from "./ui/Select";
+
+const LANGUAGE_SHORT_LABELS: Record<SupportedLanguage, string> = {
+  vi: "vi",
+  en: "en",
+  ja: "jp",
+};
 
 interface NavItem {
   labelKey: string;
@@ -18,60 +25,110 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: "nav.agentConfig", href: "/agent-config", adminOnly: true },
 ];
 
+const THEME_MODES: ThemeMode[] = ["light", "dark", "system"];
+
 interface AppLayoutProps {
   children: ReactNode;
   user: CurrentUser;
 }
 
-function UserMenu({ user }: { user: CurrentUser }) {
-  const { t } = useTranslation();
+/** Single dropdown replacing the previously separate theme toggle, language
+ * switcher, and user badge — keeps the header to 2 rows (logo+utility row,
+ * nav row) instead of cramming everything into one wide row. Opens on click,
+ * closes on click-outside or Escape. */
+function UtilityMenu({ user }: { user: CurrentUser }) {
+  const { t, i18n } = useTranslation();
+  const { mode, setMode } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setIsOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   async function handleLogout() {
     await logout();
     window.location.href = "/login";
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-fg-muted">{user.username}</span>
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="rounded-md px-2.5 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken hover:text-fg"
-      >
-        {t("auth.logout")}
-      </button>
-    </div>
-  );
-}
-
-function LanguageSwitcher() {
-  const { i18n, t } = useTranslation();
-
-  function handleChange(lang: SupportedLanguage) {
+  function handleLanguageChange(lang: SupportedLanguage) {
     i18n.changeLanguage(lang);
     setStoredLanguage(lang);
   }
 
   return (
-    <div className="flex gap-1 rounded-md border border-border p-0.5">
-      {SUPPORTED_LANGUAGES.map((lang) => {
-        const isActive = i18n.language === lang;
-        return (
-          <button
-            key={lang}
-            type="button"
-            onClick={() => handleChange(lang)}
-            className={
-              isActive
-                ? "rounded px-2.5 py-1 text-xs font-medium bg-accent text-accent-fg"
-                : "rounded px-2.5 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken"
-            }
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-sunken hover:text-fg"
+      >
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-fg">
+          {user.username.slice(0, 1).toUpperCase()}
+        </span>
+        <span className="hidden sm:inline">{user.username}</span>
+      </button>
+
+      {isOpen && (
+        <div
+          role="menu"
+          className="absolute right-0 z-50 mt-2 w-56 rounded-md border border-border bg-surface-raised p-2 shadow-lg"
+        >
+          <label className="block px-2 pb-1 text-xs font-medium text-fg-subtle">{t("theme.toggleLabel")}</label>
+          <Select
+            className="mb-2 w-full"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as ThemeMode)}
           >
-            {t(`language.${lang}`)}
+            {THEME_MODES.map((m) => (
+              <option key={m} value={m}>
+                {t(`theme.${m}`)}
+              </option>
+            ))}
+          </Select>
+
+          <div className="my-2 h-px bg-border" />
+
+          <label className="block px-2 pb-1 text-xs font-medium text-fg-subtle">{t("language.toggleLabel")}</label>
+          <Select
+            className="mb-2 w-full"
+            value={i18n.language}
+            onChange={(e) => handleLanguageChange(e.target.value as SupportedLanguage)}
+          >
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <option key={lang} value={lang}>
+                {LANGUAGE_SHORT_LABELS[lang]}
+              </option>
+            ))}
+          </Select>
+
+          <div className="my-2 h-px bg-border" />
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full rounded-md px-2 py-1.5 text-left text-sm font-medium text-fg-muted hover:bg-surface-sunken hover:text-fg"
+          >
+            {t("auth.logout")}
           </button>
-        );
-      })}
+        </div>
+      )}
     </div>
   );
 }
@@ -84,19 +141,16 @@ export function AppLayout({ children, user }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-surface text-fg">
       <header className="sticky top-0 z-40 border-b border-border bg-surface-raised/90 backdrop-blur supports-backdrop-filter:bg-surface-raised/75">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-          <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-2 text-sm font-semibold tracking-wide text-fg">
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-bold text-accent-fg">
-                T
-              </span>
-              {t("common.appName")}
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+          <span className="flex items-center gap-2 text-sm font-semibold tracking-wide text-fg">
+            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-bold text-accent-fg">
+              T
             </span>
-            <div className="flex items-center gap-2 lg:hidden">
-              <ThemeToggle />
-              <LanguageSwitcher />
-            </div>
-          </div>
+            {t("common.appName")}
+          </span>
+          <UtilityMenu user={user} />
+        </div>
+        <div className="mx-auto max-w-6xl px-4 pb-3 sm:px-6">
           <nav className="flex flex-wrap items-center gap-1">
             {visibleNavItems.map((item) => {
               const isActive = currentPath === item.href;
@@ -115,13 +169,6 @@ export function AppLayout({ children, user }: AppLayoutProps) {
               );
             })}
           </nav>
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 lg:flex">
-              <ThemeToggle />
-              <LanguageSwitcher />
-            </div>
-            <UserMenu user={user} />
-          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</main>

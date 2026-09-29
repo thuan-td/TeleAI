@@ -17,6 +17,7 @@
     "agentConfig": "Agent Config"
   },
   "language": {
+    "toggleLabel": "Language",
     "vi": "Tiếng Việt",
     "en": "English",
     "ja": "日本語"
