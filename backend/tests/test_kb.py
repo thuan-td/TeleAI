@@ -98,6 +98,31 @@ def test_query_documents_no_match_returns_empty_results(client, db_session):
     assert response.json()["results"] == []
 
 
+def test_query_documents_natural_language_question_still_matches_keyword(client, db_session):
+    """Regression test: a naturally-phrased question full of Vietnamese filler
+    words ("có ... không", "như thế nào") must still match on its real
+    keyword, not fail because websearch_to_tsquery's default AND requires
+    every word (including filler words absent from the document) to hit."""
+    # Arrange
+    client.post(
+        "/kb/documents",
+        json={
+            "title": "Gói tư vấn quản lý cho thuê bất động sản Tokyo",
+            "content": "Phí quản lý: 5% giá trị tiền thuê hàng tháng.",
+        },
+    )
+
+    # Act
+    response = client.post(
+        "/kb/query", json={"query": "Công ty có quản lý cho thuê hộ không, phí bao nhiêu"}
+    )
+
+    # Assert
+    assert response.status_code == 200
+    titles = [r["title"] for r in response.json()["results"]]
+    assert "Gói tư vấn quản lý cho thuê bất động sản Tokyo" in titles
+
+
 RETELL_WEBHOOK_HEADERS = {"X-KB-Webhook-Secret": "test-kb-webhook-secret"}
 
 

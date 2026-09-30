@@ -2,6 +2,7 @@ import hmac
 import io
 import logging
 import os
+import re
 import uuid
 
 import pypdf
@@ -175,8 +176,32 @@ def delete_document(document_id: uuid.UUID, db: Session = Depends(get_db)) -> No
     db.commit()
 
 
+# Vietnamese stopwords common in spoken questions ("có ... không", "như thế
+# nào", "bao nhiêu") — filtered out before building the query so they don't
+# force an AND-match against words the KB documents never contain. Keeping
+# this OR-based (any real keyword matches) instead of AND-based (every word
+# must match) fixes natural-sounding questions returning zero results even
+# when the KB has an obviously relevant document (see docs/demo-test-scenarios.md).
+_STOPWORDS = {
+    "có", "không", "là", "gì", "như", "thế", "nào", "bao", "nhiêu", "và",
+    "của", "cho", "được", "khi", "đang", "sẽ", "này", "đó", "về", "với",
+    "hộ", "ạ", "à", "vậy", "thì", "để", "một", "các", "những", "phải",
+}
+
+
+def _build_or_tsquery(query_text: str):
+    """Split into words, drop stopwords/short tokens, OR them together —
+    matches if ANY real keyword hits, instead of websearch_to_tsquery's
+    default AND (every word must hit)."""
+    words = re.findall(r"\w+", query_text.lower())
+    keywords = [w for w in words if len(w) >= 2 and w not in _STOPWORDS]
+    if not keywords:
+        keywords = words or [query_text]
+    return func.to_tsquery("simple", " | ".join(keywords))
+
+
 def _search(db: Session, query_text: str) -> list[KnowledgeBaseQueryResult]:
-    tsquery = func.websearch_to_tsquery("simple", query_text)
+    tsquery = _build_or_tsquery(query_text)
     rank = func.ts_rank(KnowledgeBaseDocument.tokens, tsquery)
     rows = db.execute(
         select(KnowledgeBaseDocument)
